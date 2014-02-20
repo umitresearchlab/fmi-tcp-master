@@ -83,6 +83,7 @@ ELSE(WIN32)
         fmitcp
         fmilib
         lacewing
+        dl
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${PROTOBUF_LIBRARY}
