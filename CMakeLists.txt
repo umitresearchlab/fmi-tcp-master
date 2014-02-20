@@ -32,14 +32,21 @@ SET(MASTER_HEADERS
     include/common/url_parser.h
 )
 
+SET(SLAVE_SRCS
+  src/slave/main.cpp
+)
+SET(SLAVE_HEADERS
+)
+
 SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_LIST_DIR}/bin")
 
 INCLUDE_DIRECTORIES(include)
 
 ADD_EXECUTABLE(master ${MASTER_HEADERS} ${MASTER_SRCS})
+ADD_EXECUTABLE(slave  ${SLAVE_HEADERS}  ${SLAVE_SRCS})
 
 IF(WIN32)
-    TARGET_LINK_LIBRARIES(master
+    SET(WINLIBS
         fmitcp
         shlwapi
         lacewing
@@ -51,16 +58,49 @@ IF(WIN32)
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${PROTOBUF_LIBRARY}
-        ${CMAKE_THREAD_LIBS_INIT}
-    )
+        ${CMAKE_THREAD_LIBS_INIT})
+    TARGET_LINK_LIBRARIES(master ${WINLIBS})
+    TARGET_LINK_LIBRARIES(slave  ${WINLIBS})
 ELSE(WIN32)
-    TARGET_LINK_LIBRARIES(master
+    SET(LINUXLIBS
         fmitcp
         lacewing
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         ${PROTOBUF_LIBRARY}
-        ${CMAKE_THREAD_LIBS_INIT}
-    )
+        ${CMAKE_THREAD_LIBS_INIT})
+    TARGET_LINK_LIBRARIES(master ${LINUXLIBS})
+    TARGET_LINK_LIBRARIES(slave  ${LINUXLIBS})
 ENDIF(WIN32)
 
+
+
+
+IF(WIN32)
+  TARGET_LINK_LIBRARIES(slave
+    fmitcp
+    fmilib
+    shlwapi
+    lacewing
+    ws2_32
+    mswsock
+    crypt32
+    secur32
+    mpr
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    protobuf
+    ${CMAKE_THREAD_LIBS_INIT}
+)
+ELSE(WIN32)
+  TARGET_LINK_LIBRARIES(slave
+    fmitcp
+    fmilib
+    dl
+    lacewing
+    ${Boost_FILESYSTEM_LIBRARY}
+    ${Boost_SYSTEM_LIBRARY}
+    ${PROTOBUF_LIBRARY}
+    ${CMAKE_THREAD_LIBS_INIT}
+)
+ENDIF(WIN32)
