@@ -27,11 +27,12 @@ void FMIClient::on_fmi2_import_instantiate_slave_res(int message_id, fmitcp_prot
 
 void FMIClient::onDisconnect(){
     m_logger.log(fmitcp::Logger::LOG_DEBUG,"onDisconnect\n");
-    m_pump->exitEventLoop();
+    m_master->slaveDisconnected(this);
 };
 
 void FMIClient::onError(string err){
-    m_pump->exitEventLoop();
+    m_logger.log(fmitcp::Logger::LOG_DEBUG,"onError\n");
+    m_master->slaveError(this);
 };
 
 int FMIClient::getId(){

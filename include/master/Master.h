@@ -17,16 +17,16 @@ namespace fmitcp_master {
     class FMIClient;
 
     enum WeakCouplingAlgorithm {
-        SERIAL = 1,
-        PARALLEL = 2
+        SERIAL,
+        PARALLEL
     };
 
     enum MasterState {
-        MASTER_IDLE = 1,
-        MASTER_INITIALIZING = 2,
-        MASTER_TRANSFERRING_WEAK = 4,
-        MASTER_TRANSFERRING_STRONG = 8,
-        MASTER_STEPPING = 16
+        MASTER_IDLE,
+        MASTER_INITIALIZING,
+        MASTER_TRANSFERRING_WEAK,
+        MASTER_TRANSFERRING_STRONG,
+        MASTER_STEPPING
     };
 
     class Master {
@@ -58,9 +58,9 @@ namespace fmitcp_master {
         int connectSlave(std::string uri);
 
         FMIClient * getSlave(int id);
-        void clientConnected(FMIClient * client);
-        //void clientDisconnected(lw_client client);
-        //void clientData(lw_client client, const char* data, long size);
+        void slaveConnected(FMIClient * slave);
+        void slaveDisconnected(FMIClient * slave);
+        void slaveError(FMIClient * slave);
 
         void setTimeStep(double timeStep);
         void setEnableEndTime(bool enable);

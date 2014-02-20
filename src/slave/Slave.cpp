@@ -1,5 +1,4 @@
-#include "Slave.h"
-//#include "Logger.h"
+#include "slave/Slave.h"
 #include "fmilib.h"
 #include "stdio.h"
 #include "stdlib.h"

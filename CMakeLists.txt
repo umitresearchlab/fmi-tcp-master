@@ -32,6 +32,18 @@ SET(MASTER_HEADERS
     include/common/url_parser.h
 )
 
+SET(TEST_SRCS
+    test/main.cpp
+    src/master/Master.cpp
+    src/master/Logger.cpp
+    src/slave/Slave.cpp
+)
+SET(TEST_HEADERS
+    include/master/Logger.h
+    include/master/Master.h
+    include/slave/Slave.h
+)
+
 SET(SLAVE_SRCS
   src/slave/main.cpp
 )
@@ -44,6 +56,7 @@ INCLUDE_DIRECTORIES(include)
 
 ADD_EXECUTABLE(master ${MASTER_HEADERS} ${MASTER_SRCS})
 ADD_EXECUTABLE(slave  ${SLAVE_HEADERS}  ${SLAVE_SRCS})
+ADD_EXECUTABLE(test   ${TEST_HEADERS}   ${TEST_SRCS})
 
 IF(WIN32)
     SET(WINLIBS
@@ -61,6 +74,7 @@ IF(WIN32)
         ${CMAKE_THREAD_LIBS_INIT})
     TARGET_LINK_LIBRARIES(master ${WINLIBS})
     TARGET_LINK_LIBRARIES(slave  ${WINLIBS})
+    TARGET_LINK_LIBRARIES(test   ${WINLIBS})
 ELSE(WIN32)
     SET(LINUXLIBS
         fmitcp
@@ -71,4 +85,5 @@ ELSE(WIN32)
         ${CMAKE_THREAD_LIBS_INIT})
     TARGET_LINK_LIBRARIES(master ${LINUXLIBS})
     TARGET_LINK_LIBRARIES(slave  ${LINUXLIBS})
+    TARGET_LINK_LIBRARIES(test   ${LINUXLIBS})
 ENDIF(WIN32)

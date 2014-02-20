@@ -132,7 +132,7 @@ FMIClient * Master::getSlave(int id){
     return NULL;
 }
 
-void Master::clientConnected(FMIClient * client){
+void Master::slaveConnected(FMIClient * client){
     m_logger.log(Logger::NETWORK,"Connected to slave.\n");
 
     // Check if all slaves are connected.
@@ -154,27 +154,29 @@ void Master::clientConnected(FMIClient * client){
     }
 }
 
-/*
-void Master::clientDisconnected(lw_client client){
+void Master::slaveError(FMIClient * client){
+    m_logger.log(Logger::NETWORK,"Slave %d error!\n", client->getId());
+    m_pump->exitEventLoop();
+}
+
+void Master::slaveDisconnected(FMIClient* client){
     m_logger.log(Logger::NETWORK,"Disconnected slave.\n");
 
     // Remove from slave vector
     for(int i=0; i<m_slaves.size(); i++){
-        if(m_slaves[i]->getClient() == client){
+        if(m_slaves[i] == client){
             delete m_slaves[i];
             m_slaves.erase(m_slaves.begin()+i);
-            lw_stream_delete(client);
             break;
         }
     }
 
     // No slaves left - exit
     if(m_slaves.size() == 0)
-        lw_eventpump_post_eventloop_exit(m_pump);
+        m_pump->exitEventLoop();
 }
-*/
-    /*
 
+/*
 void Master::clientData(lw_client client, const char* data, long size){
     m_logger.log(Logger::NETWORK,"<-- %s\n",data);
     int slave = getSlave(client);
