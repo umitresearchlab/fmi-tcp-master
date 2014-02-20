@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
       std::istringstream ss(nextArg);
       ss >> logging;
 
-      if (logging <= 0) {
+      if (logging < 0) {
         printf("Invalid logging. Possible options are from 0 to 7.\n");fflush(NULL);
         return EXIT_FAILURE;
       }
@@ -123,6 +123,8 @@ int main(int argc, char *argv[]) {
 
   EventPump pump;
   FMIServer server(fmuPath, debugLogging, log_level, &pump);
+  if (!server.isFmuParsed())
+    return EXIT_FAILURE;
   server.host(hostName, port);
   server.getLogger()->setFilter(Logger::LOG_NETWORK | Logger::LOG_DEBUG | Logger::LOG_ERROR);
   pump.startEventLoop();

@@ -100,6 +100,8 @@ int main(int argc, char *argv[] ) {
 
     // Create a slave
     fmitcp::Server server(fmuPath, debugLogging, log_level, master.getEventPump());
+    if (!server.isFmuParsed())
+      return EXIT_FAILURE;
     server.getLogger()->setPrefix("Slave: ");
     server.host(hostName,port);
 
