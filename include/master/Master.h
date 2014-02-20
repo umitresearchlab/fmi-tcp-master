@@ -10,7 +10,6 @@
 
 #include "master/StrongConnection.h"
 #include "master/WeakConnection.h"
-#include "common/Logger.h"
 
 namespace fmitcp_master {
 
