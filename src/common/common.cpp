@@ -28,3 +28,9 @@ int fmitcp_master::string_to_int(const string& s){
     ss >> result;
     return result;
 }
+
+string fmitcp_master::int_to_string(int i){
+    ostringstream ss;
+    ss << i;
+    return ss.str();
+}

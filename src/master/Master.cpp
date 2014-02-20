@@ -107,7 +107,7 @@ void Master::transferWeakConnectionData(){
     }
 }
 
-int Master::connectSlave(std::string uri){
+FMIClient* Master::connectSlave(std::string uri){
     struct parsed_url * url = parse_url(uri.c_str());
     long port = atoi(url->port);
 
@@ -122,7 +122,7 @@ int Master::connectSlave(std::string uri){
 
     parsed_url_free(url);
 
-    return slaveId;
+    return client;
 }
 
 void Master::simulate(){

@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <sstream>
 #include "master/Master.h"
+#include "master/FMIClient.h"
 #include "common/common.h"
 
 using namespace fmitcp_master;
@@ -40,7 +41,7 @@ int main(int argc, char *argv[] ) {
     vector<int> weak_connA;
     vector<int> weak_connB;
 
-    vector<int> slave_ids;
+    vector<FMIClient*> slaves;
 
     for (j = 1; j < argc; j++) {
         std::string arg = argv[j];
@@ -131,7 +132,7 @@ int main(int argc, char *argv[] ) {
 
         } else {
             // Assume URI to slave
-            slave_ids.push_back(master.connectSlave(arg));
+            slaves.push_back(master.connectSlave(arg));
         }
     }
 

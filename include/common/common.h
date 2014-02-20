@@ -13,7 +13,7 @@ namespace fmitcp_master {
     vector<string> &split(const string &s, char delim, vector<string> &elems);
     vector<string> split(const string &s, char delim);
     int string_to_int(const string& s);
-
+    string int_to_string(int i);
 }
 
 #endif

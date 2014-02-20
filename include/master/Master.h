@@ -62,7 +62,7 @@ namespace fmitcp_master {
         fmitcp::Logger * getLogger();
 
         /// Connects to a slave and gets info about it
-        int connectSlave(std::string uri);
+        FMIClient* connectSlave(std::string uri);
 
         /// Get a slave by id
         FMIClient * getSlave(int id);
