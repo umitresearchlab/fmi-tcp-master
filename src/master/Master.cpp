@@ -5,7 +5,7 @@
 
 #include "master/Master.h"
 #include "master/FMIClient.h"
-#include "master/Logger.h"
+#include "common/Logger.h"
 #include "master/StrongConnection.h"
 #include "master/WeakConnection.h"
 #include "common/url_parser.h"

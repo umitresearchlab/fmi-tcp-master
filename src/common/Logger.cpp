@@ -1,4 +1,4 @@
-#include "master/Logger.h"
+#include "common/Logger.h"
 #include "stdio.h"
 
 fmitcp_master::Logger::Logger(){

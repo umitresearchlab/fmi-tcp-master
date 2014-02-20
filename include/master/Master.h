@@ -7,10 +7,10 @@
 #include <string>
 #include <fmitcp/EventPump.h>
 
-#include "StrongConnection.h"
-#include "WeakConnection.h"
-#include "Slave.h"
-#include "Logger.h"
+#include "master/StrongConnection.h"
+#include "master/WeakConnection.h"
+#include "slave/Slave.h"
+#include "common/Logger.h"
 
 namespace fmitcp_master {
 
