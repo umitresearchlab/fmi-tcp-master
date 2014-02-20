@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <sstream>
-#include <fmilib.h>
 #include "master/Master.h"
 #include "common/common.h"
 
