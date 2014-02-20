@@ -119,6 +119,7 @@ int Master::connectSlave(std::string uri){
 
 void Master::simulate(){
     m_pump->startEventLoop();
+    tick();
 }
 
 FMIClient * Master::getSlave(int id){
@@ -176,15 +177,51 @@ void Master::slaveDisconnected(FMIClient* client){
 
 void Master::tick(){
     switch(m_state){
-    case MASTER_STATE_START: break;
-    case MASTER_STATE_CONNECTING_SLAVES: break;
-    case MASTER_STATE_FETCHING_VERSION: break;
-    case MASTER_STATE_FETCHING_XML: break;
-    case MASTER_STATE_INSTANTIATING_SLAVES: break;
-    case MASTER_STATE_INITIALIZING_SLAVES: break;
-    case MASTER_STATE_TRANSFERRING_WEAK: break;
-    case MASTER_STATE_TRANSFERRING_STRONG: break;
-    case MASTER_STATE_STEPPING_SLAVES: break;
+
+    case MASTER_STATE_START:
+        m_state = MASTER_STATE_CONNECTING_SLAVES;
+        break;
+
+    case MASTER_STATE_CONNECTING_SLAVES:
+        break;
+
+    case MASTER_STATE_FETCHING_VERSION:
+        break;
+
+    case MASTER_STATE_FETCHING_XML:
+        break;
+
+    case MASTER_STATE_INSTANTIATING_SLAVES:
+        break;
+
+    case MASTER_STATE_INITIALIZING_SLAVES:
+        break;
+
+    case MASTER_STATE_TRANSFERRING_WEAK:
+        break;
+
+    case MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES:
+
+        break;
+
+    case MASTER_STATE_TRANSFERRING_STRONG:
+        // Check if all strong coupling forces are applied
+        /*
+        bool allReady = true;
+        for(int i=0; i<m_strongConnections.size(); i++){
+            if(!m_strongConnections[i]->ready()){
+                allReady = false;
+                break;
+            }
+        }
+        if(allReady){
+
+        }
+        */
+        break;
+
+    case MASTER_STATE_STEPPING_SLAVES:
+        break;
     }
 }
 
@@ -343,3 +380,52 @@ bool Master::hasAllClientsState(Slave::SlaveState state){
     return true;
 }
 */
+
+void Master::onSlaveGetXML(FMIClient * slave){
+
+};
+
+void Master::onSlaveInstanted(FMIClient* slave){
+
+};
+
+void Master::onSlaveInitialized(FMIClient* slave){
+
+};
+
+void Master::onSlaveTerminated(FMIClient* slave){
+
+};
+
+void Master::onSlaveFreed(FMIClient* slave){
+
+};
+
+void Master::onSlaveStepped(FMIClient* slave){
+
+};
+
+void Master::onSlaveGotVersion(FMIClient* slave){
+
+};
+
+void Master::onSlaveSetReal(FMIClient* slave){
+
+};
+
+void Master::onSlaveGotReal(FMIClient* slave){
+
+};
+
+void Master::onSlaveGotState(FMIClient* slave){
+
+};
+
+void Master::onSlaveSetState(FMIClient* slave){
+
+};
+
+void Master::onSlaveFreedState(FMIClient* slave){
+
+};
+

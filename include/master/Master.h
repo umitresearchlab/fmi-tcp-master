@@ -28,6 +28,7 @@ namespace fmitcp_master {
         MASTER_STATE_INSTANTIATING_SLAVES,
         MASTER_STATE_INITIALIZING_SLAVES,
         MASTER_STATE_TRANSFERRING_WEAK,
+        MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES,
         MASTER_STATE_TRANSFERRING_STRONG,
         MASTER_STATE_STEPPING_SLAVES
     };
@@ -60,14 +61,36 @@ namespace fmitcp_master {
         /// Connects to a slave and gets info about it
         int connectSlave(std::string uri);
 
+        /// Get a slave by id
         FMIClient * getSlave(int id);
+
+        // These are callbacks that fire when a slave did something:
         void slaveConnected(FMIClient * slave);
         void slaveDisconnected(FMIClient * slave);
         void slaveError(FMIClient * slave);
+        void onSlaveGetXML(FMIClient * slave);
+        void onSlaveInstanted(FMIClient* slave);
+        void onSlaveInitialized(FMIClient* slave);
+        void onSlaveTerminated(FMIClient* slave);
+        void onSlaveFreed(FMIClient* slave);
+        void onSlaveStepped(FMIClient* slave);
+        void onSlaveGotVersion(FMIClient* slave);
+        void onSlaveSetReal(FMIClient* slave);
+        void onSlaveGotReal(FMIClient* slave);
+        void onSlaveGotState(FMIClient* slave);
+        void onSlaveSetState(FMIClient* slave);
+        void onSlaveFreedState(FMIClient* slave);
 
+        /// Set communication timestep
         void setTimeStep(double timeStep);
+
+        /// Enable or disable end time
         void setEnableEndTime(bool enable);
+
+        /// Set the simulation end time
         void setEndTime(double endTime);
+
+        /// Set method for weak coupling
         void setWeakMethod(WeakCouplingAlgorithm algorithm);
 
         void createStrongConnection(int slaveA, int slaveB, int connectorA, int connectorB);
