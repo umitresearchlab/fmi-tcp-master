@@ -12,7 +12,6 @@ SET(MASTER_SRCS
     src/master/Connection.cpp
     src/master/main.cpp
     src/master/Master.cpp
-    src/common/Logger.cpp
     src/master/FMIClient.cpp
     src/master/StrongConnection.cpp
     src/master/WeakConnection.cpp
@@ -22,7 +21,6 @@ SET(MASTER_SRCS
 SET(MASTER_HEADERS
     include/master/Connection.h
     include/master/Master.h
-    include/common/Logger.h
     include/master/FMIClient.h
     include/master/StrongConnection.h
     include/master/WeakConnection.h
@@ -34,7 +32,6 @@ SET(TEST_SRCS
     test/main.cpp
     src/master/Connection.cpp
     src/master/Master.cpp
-    src/common/Logger.cpp
     src/master/FMIClient.cpp
     src/master/StrongConnection.cpp
     src/master/WeakConnection.cpp
@@ -44,7 +41,6 @@ SET(TEST_SRCS
 SET(TEST_HEADERS
     include/master/Connection.h
     include/master/Master.h
-    include/common/Logger.h
     include/master/FMIClient.h
     include/master/StrongConnection.h
     include/master/WeakConnection.h
