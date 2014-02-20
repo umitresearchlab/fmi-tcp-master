@@ -12,7 +12,8 @@ void printHelp(){
 \n\
 [OPTIONS]\n\
     --host [HOST]   The host. Defaults to 'localhost'.\n\
-    --port [PORT]   A free port to use.\n\n");
+    --port [PORT]   A free port to use.\n\
+    fmu");
 }
 
 int main(int argc, char *argv[] ) {
@@ -21,7 +22,11 @@ int main(int argc, char *argv[] ) {
 
     long port = 3000;
     int j;
-    string hostName = "localhost";
+    bool debugLogging = false;
+    jm_log_level_enu_t log_level = jm_log_level_fatal;
+    int logging = jm_log_level_fatal;
+    string hostName = "localhost",
+        fmuPath = "";
 
     fmitcp::Logger logger;
     Master master(logger);
@@ -37,6 +42,39 @@ int main(int argc, char *argv[] ) {
             printHelp();
             return EXIT_SUCCESS;
 
+        } else if (arg == "-d" || arg == "--debugLogging") {
+          debugLogging = true;
+
+        } else if ((arg == "-l" || arg == "--logging") && !last) {
+          std::string nextArg = argv[j+1];
+
+          std::istringstream ss(nextArg);
+          ss >> logging;
+
+          if (logging < 0) {
+            printf("Invalid logging. Possible options are from 0 to 7.\n");fflush(NULL);
+            return EXIT_FAILURE;
+          }
+
+          switch (logging) {
+          case 0:
+            log_level = jm_log_level_nothing; break;
+          case 1:
+            log_level = jm_log_level_fatal; break;
+          case 2:
+            log_level = jm_log_level_error; break;
+          case 3:
+            log_level = jm_log_level_warning; break;
+          case 4:
+            log_level = jm_log_level_info; break;
+          case 5:
+            log_level = jm_log_level_verbose; break;
+          case 6:
+            log_level = jm_log_level_debug; break;
+          case 7:
+            log_level = jm_log_level_all; break;
+          }
+
         } else if((arg == "--port" || arg == "-p") && !last) {
             std::string nextArg = argv[j+1];
 
@@ -50,11 +88,18 @@ int main(int argc, char *argv[] ) {
         } else if (arg == "--host" && !last) {
             hostName = argv[j+1];
 
+        } else {
+          fmuPath = argv[j];
         }
     }
 
+    if(fmuPath == "") {
+      printHelp();
+      return EXIT_FAILURE;
+    }
+
     // Create a slave
-    fmitcp::Server server("", false, jm_log_level_all, master.getEventPump());
+    fmitcp::Server server(fmuPath, debugLogging, log_level, master.getEventPump());
     server.getLogger()->setPrefix("Slave: ");
     server.host(hostName,port);
 
