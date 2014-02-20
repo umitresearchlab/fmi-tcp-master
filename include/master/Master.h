@@ -50,6 +50,8 @@ namespace fmitcp_master {
         double m_startTime;
         double m_endTime;
         bool m_endTimeDefined;
+        /// Current time
+        double m_time;
 
     public:
         Master();
@@ -66,6 +68,8 @@ namespace fmitcp_master {
 
         /// Get a slave by id
         FMIClient * getSlave(int id);
+
+        void setState(MasterState state);
 
         // These are callbacks that fire when a slave did something:
         void slaveConnected(FMIClient * slave);
@@ -105,6 +109,7 @@ namespace fmitcp_master {
         void simulate();
 
         void initializeSlaves();
+        void stepSlaves();
 
         //bool hasAllClientsState(Slave::SlaveState state);
 

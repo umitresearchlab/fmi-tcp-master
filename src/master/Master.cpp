@@ -26,13 +26,14 @@ void Master::init(){
     m_pump = new fmitcp::EventPump();
 
     // Set state
-    m_state = MASTER_STATE_CONNECTING_SLAVES;
+    setState(MASTER_STATE_CONNECTING_SLAVES);
     m_slaveIdCounter = 0;
 
     m_relativeTolerance = 0.0001;
     m_startTime = 0;
     m_endTimeDefined = false;
     m_endTime = 10;
+    m_time = 0;
 }
 
 Master::~Master(){
@@ -157,20 +158,47 @@ void Master::slaveDisconnected(FMIClient* client){
 }
 
 void Master::initializeSlaves(){
+    setState(MASTER_STATE_INITIALIZING_SLAVES);
     for(int i=0; i<m_slaves.size(); i++){
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"Initializing slave %d...\n", i);
         m_slaves[i]->fmi2_import_initialize_slave(0, 0, m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
     }
 }
 
+void Master::stepSlaves(){
+    setState(MASTER_STATE_STEPPING_SLAVES);
+    for(int i=0; i<m_slaves.size(); i++){
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Stepping slave %d...\n", i);
+        //m_slaves[i]->fmi2_import_do_step(0, 0, m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
+        m_slaves[i]->fmi2_import_do_step(0,0,m_time,m_timeStep,true);
+    }
+    m_time += m_timeStep;
+}
+
+void Master::setState(MasterState state){
+    m_state = state;
+
+    switch(m_state){
+    case MASTER_STATE_CONNECTING_SLAVES:                m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_CONNECTING_SLAVES\n");                 break;
+    case MASTER_STATE_FETCHING_VERSION:                 m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_FETCHING_VERSION\n");                  break;
+    case MASTER_STATE_FETCHING_XML:                     m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_FETCHING_XML\n");                      break;
+    case MASTER_STATE_INSTANTIATING_SLAVES:             m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_INSTANTIATING_SLAVES\n");              break;
+    case MASTER_STATE_INITIALIZING_SLAVES:              m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_INITIALIZING_SLAVES\n");               break;
+    case MASTER_STATE_TRANSFERRING_WEAK:                m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_TRANSFERRING_WEAK\n");                 break;
+    case MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES: m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES\n");  break;
+    case MASTER_STATE_TRANSFERRING_STRONG:              m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_TRANSFERRING_STRONG\n");               break;
+    case MASTER_STATE_STEPPING_SLAVES:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_STEPPING_SLAVES\n");                   break;
+    }
+
+}
+
 void Master::tick(){
 
-    bool allConnected;
+    bool allConnected, allInitialized;
 
     switch(m_state){
 
     case MASTER_STATE_CONNECTING_SLAVES:
-        m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_CONNECTING_SLAVES\n");
 
         // Check if all slaves are connected.
         allConnected = true;
@@ -185,7 +213,6 @@ void Master::tick(){
             break;
 
         // Enough slaves connected. Start initializing!
-        m_state = MASTER_STATE_INITIALIZING_SLAVES;
         initializeSlaves();
         break;
 
@@ -199,6 +226,21 @@ void Master::tick(){
         break;
 
     case MASTER_STATE_INITIALIZING_SLAVES:
+        // Check if all are ready
+        allInitialized = true;
+        for(int i=0; i<m_slaves.size(); i++){
+            if(!m_slaves[i]->isInitialized()){
+                allInitialized = false;
+                break;
+            }
+        }
+
+        if(!allInitialized)
+            break;
+
+        // All slaves are initialized.
+        // Should set initial values here. TODO!
+        stepSlaves();
         break;
 
     case MASTER_STATE_TRANSFERRING_WEAK:
@@ -224,6 +266,20 @@ void Master::tick(){
         break;
 
     case MASTER_STATE_STEPPING_SLAVES:
+        // Check if all have stepped
+        bool allReady = true;
+        for(int i=0; i<m_slaves.size(); i++){
+            if(m_slaves[i]->getState() == FMICLIENT_STATE_WAITING_DOSTEP){
+                allReady = false;
+                break;
+            }
+        }
+        if(allReady){
+            // Next step?
+            if(m_endTimeDefined && m_time < m_endTime){
+                stepSlaves();
+            }
+        }
         break;
     }
 }
@@ -385,50 +441,50 @@ bool Master::hasAllClientsState(Slave::SlaveState state){
 */
 
 void Master::onSlaveGetXML(FMIClient * slave){
-
+    tick();
 };
 
 void Master::onSlaveInstanted(FMIClient* slave){
-
+    tick();
 };
 
 void Master::onSlaveInitialized(FMIClient* slave){
-
+    tick();
 };
 
 void Master::onSlaveTerminated(FMIClient* slave){
-
+    tick();
 };
 
 void Master::onSlaveFreed(FMIClient* slave){
-
+    tick();
 };
 
 void Master::onSlaveStepped(FMIClient* slave){
-
+    tick();
 };
 
 void Master::onSlaveGotVersion(FMIClient* slave){
-
+    tick();
 };
 
 void Master::onSlaveSetReal(FMIClient* slave){
-
+    tick();
 };
 
 void Master::onSlaveGotReal(FMIClient* slave){
-
+    tick();
 };
 
 void Master::onSlaveGotState(FMIClient* slave){
-
+    tick();
 };
 
 void Master::onSlaveSetState(FMIClient* slave){
-
+    tick();
 };
 
 void Master::onSlaveFreedState(FMIClient* slave){
-
+    tick();
 };
 

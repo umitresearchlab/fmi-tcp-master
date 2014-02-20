@@ -20,6 +20,8 @@ namespace fmitcp_master {
         int m_id;
         Master * m_master;
         string m_xml;
+        bool m_initialized;
+        FMIClientState m_state;
 
     public:
         FMIClient(Master* master, fmitcp::EventPump* pump);
@@ -27,6 +29,9 @@ namespace fmitcp_master {
 
         int getId();
         void setId(int id);
+        FMIClientState getState();
+        bool isInitialized();
+
         void onConnect();
         void onDisconnect();
         void onError(string err);

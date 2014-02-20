@@ -8,6 +8,8 @@ using namespace fmitcp_master;
 
 FMIClient::FMIClient(Master* master, fmitcp::EventPump* pump) : fmitcp::Client(pump) {
     m_master = master;
+    m_initialized = false;
+    m_state = FMICLIENT_STATE_START;
 };
 
 FMIClient::~FMIClient(){
@@ -37,6 +39,14 @@ void FMIClient::setId(int id){
     m_id = id;
 };
 
+FMIClientState FMIClient::getState(){
+    return m_state;
+};
+
+bool FMIClient::isInitialized(){
+    return m_initialized;
+};
+
 void FMIClient::onGetXmlRes(int mid, string xml){
     m_xml = xml;
     m_master->onSlaveGetXML(this);
@@ -47,6 +57,7 @@ void FMIClient::on_fmi2_import_instantiate_slave_res(int mid, fmitcp_proto::jm_s
 };
 
 void FMIClient::on_fmi2_import_initialize_slave_res(int mid, fmitcp_proto::fmi2_status_t status){
+    m_initialized = true; // Todo check the status
     m_master->onSlaveInitialized(this);
 };
 
