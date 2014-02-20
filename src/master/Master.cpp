@@ -1,11 +1,11 @@
 #include <string>
 #include <fmitcp/EventPump.h>
+#include <fmitcp/Logger.h>
 #include "stdlib.h"
 #include "string.h"
 
 #include "master/Master.h"
 #include "master/FMIClient.h"
-#include "common/Logger.h"
 #include "master/StrongConnection.h"
 #include "master/WeakConnection.h"
 #include "common/url_parser.h"
@@ -16,7 +16,7 @@ Master::Master(){
     init();
 }
 
-Master::Master(const Logger& logger){
+Master::Master(const fmitcp::Logger& logger){
     m_logger = logger;
     init();
 }
@@ -50,6 +50,14 @@ Master::~Master(){
         delete m_slaves[i];
     }
 }
+
+fmitcp::EventPump * Master::getEventPump(){
+    return m_pump;
+}
+
+fmitcp::Logger * Master::getLogger(){
+    return &m_logger;
+};
 
 /*
 void Master_clientOnConnect(lw_client client) {
@@ -110,7 +118,7 @@ int Master::connectSlave(std::string uri){
     int slaveId = m_slaveIdCounter++;
     client->setId(slaveId);
 
-    m_logger.log(Logger::DEBUG,"Connected slave id=%d: %s\n",slaveId,uri.c_str());
+    m_logger.log(fmitcp::Logger::LOG_DEBUG,"Connected slave id=%d: %s\n",slaveId,uri.c_str());
 
     parsed_url_free(url);
 
@@ -132,7 +140,7 @@ FMIClient * Master::getSlave(int id){
 }
 
 void Master::slaveConnected(FMIClient * client){
-    m_logger.log(Logger::NETWORK,"Connected to slave %d.\n",client->getId());
+    m_logger.log(fmitcp::Logger::LOG_NETWORK,"Connected to slave %d.\n",client->getId());
 
     // Check if all slaves are connected.
     bool allConnected = true;
@@ -148,18 +156,18 @@ void Master::slaveConnected(FMIClient * client){
 
     // Enough slaves connected. Start simulation!
     for(int i=0; i<m_slaves.size(); i++){
-        m_logger.log(Logger::DEBUG,"Initializing slave %d...\n", i);
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Initializing slave %d...\n", i);
         m_slaves[i]->fmi2_import_initialize_slave(0, 0, m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
     }
 }
 
 void Master::slaveError(FMIClient * client){
-    m_logger.log(Logger::NETWORK,"Slave %d error!\n", client->getId());
+    m_logger.log(fmitcp::Logger::LOG_NETWORK,"Slave %d error!\n", client->getId());
     m_pump->exitEventLoop();
 }
 
 void Master::slaveDisconnected(FMIClient* client){
-    m_logger.log(Logger::NETWORK,"Disconnected slave.\n");
+    m_logger.log(fmitcp::Logger::LOG_NETWORK,"Disconnected slave.\n");
 
     // Remove from slave vector
     for(int i=0; i<m_slaves.size(); i++){

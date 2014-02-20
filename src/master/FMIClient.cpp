@@ -15,7 +15,8 @@ FMIClient::~FMIClient(){
 };
 
 void FMIClient::onConnect(){
-    fmi2_import_do_step(0,0,0.0,0.1,true);
+    //fmi2_import_do_step(0,0,0.0,0.1,true);
+    m_master->slaveConnected(this);
 };
 
 void FMIClient::onDisconnect(){

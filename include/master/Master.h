@@ -6,6 +6,7 @@
 #include <limits.h>
 #include <string>
 #include <fmitcp/EventPump.h>
+#include <fmitcp/Logger.h>
 
 #include "master/StrongConnection.h"
 #include "master/WeakConnection.h"
@@ -42,7 +43,7 @@ namespace fmitcp_master {
         std::vector<int> m_slave_ids;
         fmitcp::EventPump * m_pump;
         int m_slaveIdCounter;
-        fmitcp_master::Logger m_logger;
+        fmitcp::Logger m_logger;
         WeakCouplingAlgorithm m_method;
         MasterState m_state;
         double m_relativeTolerance;
@@ -53,10 +54,13 @@ namespace fmitcp_master {
 
     public:
         Master();
-        Master(const Logger& logger);
+        Master(const fmitcp::Logger& logger);
         ~Master();
 
         void init();
+
+        fmitcp::EventPump * getEventPump();
+        fmitcp::Logger * getLogger();
 
         /// Connects to a slave and gets info about it
         int connectSlave(std::string uri);

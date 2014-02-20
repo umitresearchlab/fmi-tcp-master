@@ -1,6 +1,7 @@
 #include <string>
 #include <fmitcp/Client.h>
 #include <fmitcp/common.h>
+#include <fmitcp/Logger.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <sstream>
@@ -17,7 +18,7 @@ int main(int argc, char *argv[] ) {
 
     printf("FMI Master %s\n",FMITCPMASTER_VERSION);fflush(NULL);
 
-    Logger logger;
+    fmitcp::Logger logger;
     Master master(logger);
     master.setTimeStep(0.1);
     master.setEnableEndTime(false);

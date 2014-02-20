@@ -1,5 +1,7 @@
 #include <string>
+#include <sstream>
 #include <stdlib.h>
+#include <fmitcp/Server.h>
 #include "master/Master.h"
 #include "common/common.h"
 
@@ -9,8 +11,8 @@ void printHelp(){
     printf("Usage: ./test [OPTIONS]\n\
 \n\
 [OPTIONS]\n\
-    --host [HOST]\n\
-    --port [PORT]\n");
+    --host [HOST]   The host. Defaults to 'localhost'.\n\
+    --port [PORT]   A free port to use.\n\n");
 }
 
 int main(int argc, char *argv[] ) {
@@ -21,7 +23,7 @@ int main(int argc, char *argv[] ) {
     int j;
     string hostName = "localhost";
 
-    Logger logger;
+    fmitcp::Logger logger;
     Master master(logger);
     master.setTimeStep(0.1);
     master.setEnableEndTime(false);
@@ -50,6 +52,18 @@ int main(int argc, char *argv[] ) {
 
         }
     }
+
+    // Create a slave
+    fmitcp::Server server(master.getEventPump());
+    server.getLogger()->setPrefix("Slave: ");
+    server.host(hostName,port);
+
+    master.getLogger()->setPrefix("Master: ");
+
+    // Connect
+    ostringstream portStringStream;
+    portStringStream << port;
+    master.connectSlave("tcp://"+hostName+":"+portStringStream.str());
 
     // Set connections
     //master.createStrongConnection(strong_slaveA[i], strong_slaveB[i], strong_connA[i], strong_connB[i]);
