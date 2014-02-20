@@ -63,6 +63,7 @@ ADD_EXECUTABLE(test   ${TEST_HEADERS}   ${TEST_SRCS})
 IF(WIN32)
     SET(WINLIBS
         fmitcp
+        fmilib
         shlwapi
         lacewing
         ws2_32
@@ -80,6 +81,7 @@ IF(WIN32)
 ELSE(WIN32)
     SET(LINUXLIBS
         fmitcp
+        fmilib
         lacewing
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}

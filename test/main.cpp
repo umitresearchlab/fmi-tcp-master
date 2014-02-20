@@ -54,7 +54,7 @@ int main(int argc, char *argv[] ) {
     }
 
     // Create a slave
-    fmitcp::Server server(master.getEventPump());
+    fmitcp::Server server("", false, jm_log_level_all, master.getEventPump());
     server.getLogger()->setPrefix("Slave: ");
     server.host(hostName,port);
 

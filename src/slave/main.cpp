@@ -11,10 +11,8 @@ using namespace fmitcp;
 // Define own server
 class FMIServer : public Server {
 public:
-  FMIServer(string fmuPath, bool debugLogging, jm_log_level_enu_t logLevel, EventPump* pump) : Server(pump) {
-    setFmuPath(fmuPath);
-    setLogLevel(logLevel);
-  }
+  FMIServer(string fmuPath, bool debugLogging, jm_log_level_enu_t logLevel, EventPump* pump)
+   : Server(fmuPath, debugLogging, logLevel, pump) {}
   ~FMIServer() {};
   void onClientConnect() {
     //printf("MyFMIServer::onConnect\n");
