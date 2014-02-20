@@ -7,7 +7,6 @@
 
 using namespace fmitcp;
 
-// Define own server
 class MyFMIServer : public Server {
 public:
     MyFMIServer(EventPump* pump) : Server(pump) {};

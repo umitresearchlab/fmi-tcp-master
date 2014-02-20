@@ -1,7 +1,6 @@
 #include <string>
 #include <stdlib.h>
 #include "master/Master.h"
-#include "slave/Slave.h"
 #include "common/common.h"
 
 using namespace fmitcp_master;

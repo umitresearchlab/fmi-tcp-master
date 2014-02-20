@@ -3,7 +3,6 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 # Protobuf
 INCLUDE(FindProtobuf)
 FIND_PACKAGE(Protobuf REQUIRED)
-
 FIND_PACKAGE(Threads REQUIRED)
 
 INCLUDE_DIRECTORIES(${FMITCP_INCLUDE_DIR} ${LACEWING_INCLUDE_DIR} ${PROTOBUF_INCLUDE_DIR} include)
@@ -33,14 +32,24 @@ SET(MASTER_HEADERS
 
 SET(TEST_SRCS
     test/main.cpp
+    src/master/Connection.cpp
     src/master/Master.cpp
     src/common/Logger.cpp
-    src/slave/Slave.cpp
+    src/master/FMIClient.cpp
+    src/master/StrongConnection.cpp
+    src/master/WeakConnection.cpp
+    src/common/url_parser.c
+    src/common/common.cpp
 )
 SET(TEST_HEADERS
-    include/common/Logger.h
+    include/master/Connection.h
     include/master/Master.h
-    include/slave/Slave.h
+    include/common/Logger.h
+    include/master/FMIClient.h
+    include/master/StrongConnection.h
+    include/master/WeakConnection.h
+    include/common/common.h
+    include/common/url_parser.h
 )
 
 SET(SLAVE_SRCS
