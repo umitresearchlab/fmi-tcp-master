@@ -58,12 +58,13 @@ int main(int argc, char *argv[] ) {
     server.getLogger()->setPrefix("Slave: ");
     server.host(hostName,port);
 
-    master.getLogger()->setPrefix("Master: ");
+    master.getLogger()->setPrefix("Master:   ");
 
     // Connect
     ostringstream portStringStream;
     portStringStream << port;
-    master.connectSlave("tcp://"+hostName+":"+portStringStream.str());
+    FMIClient* slave = master.connectSlave("tcp://"+hostName+":"+portStringStream.str());
+    slave->getLogger()->setPrefix("Master "+int_to_string(slave->getId())+": ");
 
     // Set connections
     //master.createStrongConnection(strong_slaveA[i], strong_slaveB[i], strong_connA[i], strong_connB[i]);

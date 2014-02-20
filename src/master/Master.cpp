@@ -26,7 +26,7 @@ void Master::init(){
     m_pump = new fmitcp::EventPump();
 
     // Set state
-    m_state = MASTER_STATE_START;
+    m_state = MASTER_STATE_CONNECTING_SLAVES;
     m_slaveIdCounter = 0;
 
     m_relativeTolerance = 0.0001;
@@ -86,16 +86,6 @@ void Master_clientOnError(lw_client client, lw_error error) {
     lw_stream_delete(client);
 }*/
 
-void Master::initializeSlaves(){
-    m_state = MASTER_STATE_INITIALIZING_SLAVES;
-
-    for (int i = 0; i < m_slaves.size(); ++i){
-
-        // Start to initialize
-        //m_slaves[i]->initialize();
-    }
-}
-
 void Master::transferWeakConnectionData(){
     m_state = MASTER_STATE_TRANSFERRING_WEAK;
 
@@ -141,24 +131,7 @@ FMIClient * Master::getSlave(int id){
 
 void Master::slaveConnected(FMIClient * client){
     m_logger.log(fmitcp::Logger::LOG_NETWORK,"Connected to slave %d.\n",client->getId());
-
-    // Check if all slaves are connected.
-    bool allConnected = true;
-    for(int i=0; i<m_slaves.size(); i++){
-        if(!m_slaves[i]->isConnected()){
-            allConnected = false;
-            break;
-        }
-    }
-
-    if(!allConnected)
-        return;
-
-    // Enough slaves connected. Start simulation!
-    for(int i=0; i<m_slaves.size(); i++){
-        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Initializing slave %d...\n", i);
-        m_slaves[i]->fmi2_import_initialize_slave(0, 0, m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
-    }
+    tick();
 }
 
 void Master::slaveError(FMIClient * client){
@@ -183,14 +156,37 @@ void Master::slaveDisconnected(FMIClient* client){
         m_pump->exitEventLoop();
 }
 
+void Master::initializeSlaves(){
+    for(int i=0; i<m_slaves.size(); i++){
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Initializing slave %d...\n", i);
+        m_slaves[i]->fmi2_import_initialize_slave(0, 0, m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
+    }
+}
+
 void Master::tick(){
+
+    bool allConnected;
+
     switch(m_state){
 
-    case MASTER_STATE_START:
-        m_state = MASTER_STATE_CONNECTING_SLAVES;
-        break;
-
     case MASTER_STATE_CONNECTING_SLAVES:
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_CONNECTING_SLAVES\n");
+
+        // Check if all slaves are connected.
+        allConnected = true;
+        for(int i=0; i<m_slaves.size(); i++){
+            if(!m_slaves[i]->isConnected()){
+                allConnected = false;
+                break;
+            }
+        }
+
+        if(!allConnected)
+            break;
+
+        // Enough slaves connected. Start initializing!
+        m_state = MASTER_STATE_INITIALIZING_SLAVES;
+        initializeSlaves();
         break;
 
     case MASTER_STATE_FETCHING_VERSION:
@@ -209,7 +205,6 @@ void Master::tick(){
         break;
 
     case MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES:
-
         break;
 
     case MASTER_STATE_TRANSFERRING_STRONG:
