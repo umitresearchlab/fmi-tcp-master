@@ -1,2 +1,7 @@
 bin/
 build/
+compile.bat
+run.bat
+.cproject
+.project
+.settings/*
