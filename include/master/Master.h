@@ -76,7 +76,7 @@ namespace fmitcp_master {
         void slaveDisconnected(FMIClient * slave);
         void slaveError(FMIClient * slave);
         void onSlaveGetXML(FMIClient * slave);
-        void onSlaveInstanted(FMIClient* slave);
+        void onSlaveInstantiated(FMIClient* slave);
         void onSlaveInitialized(FMIClient* slave);
         void onSlaveTerminated(FMIClient* slave);
         void onSlaveFreed(FMIClient* slave);
@@ -108,6 +108,7 @@ namespace fmitcp_master {
         /// Start simulation
         void simulate();
 
+        void instantiateSlaves();
         void initializeSlaves();
         void stepSlaves();
 

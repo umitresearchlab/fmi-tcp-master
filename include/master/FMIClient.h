@@ -37,7 +37,7 @@ namespace fmitcp_master {
         void onError(string err);
 
         void onGetXmlRes(int mid, string xml);
-        void on_fmi2_import_instantiate_slave_res               (int mid, fmitcp_proto::jm_status_enu_t status);
+        void on_fmi2_import_instantiate_res                     (int mid, fmitcp_proto::jm_status_enu_t status);
         void on_fmi2_import_initialize_slave_res                (int mid, fmitcp_proto::fmi2_status_t status);
         void on_fmi2_import_terminate_slave_res                 (int mid, fmitcp_proto::fmi2_status_t status);
         //void on_fmi2_import_reset_slave_res                     (int mid, fmitcp_proto::fmi2_status_t status);

@@ -52,8 +52,8 @@ void FMIClient::onGetXmlRes(int mid, string xml){
     m_master->onSlaveGetXML(this);
 };
 
-void FMIClient::on_fmi2_import_instantiate_slave_res(int mid, fmitcp_proto::jm_status_enu_t status){
-    m_master->onSlaveInstanted(this);
+void FMIClient::on_fmi2_import_instantiate_res(int mid, fmitcp_proto::jm_status_enu_t status){
+    m_master->onSlaveInstantiated(this);
 };
 
 void FMIClient::on_fmi2_import_initialize_slave_res(int mid, fmitcp_proto::fmi2_status_t status){

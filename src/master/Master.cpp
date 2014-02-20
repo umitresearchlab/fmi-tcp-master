@@ -157,7 +157,15 @@ void Master::slaveDisconnected(FMIClient* client){
         m_pump->exitEventLoop();
 }
 
-void Master::initializeSlaves(){
+void Master::instantiateSlaves() {
+  setState(MASTER_STATE_INSTANTIATING_SLAVES);
+  for(int i=0; i<m_slaves.size(); i++){
+    m_logger.log(fmitcp::Logger::LOG_DEBUG,"Instantiating slave %d...\n", i);
+    m_slaves[i]->fmi2_import_instantiate(0);
+  }
+}
+
+void Master::initializeSlaves() {
     setState(MASTER_STATE_INITIALIZING_SLAVES);
     for(int i=0; i<m_slaves.size(); i++){
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"Initializing slave %d...\n", i);
@@ -194,7 +202,7 @@ void Master::setState(MasterState state){
 
 void Master::tick(){
 
-    bool allConnected, allInitialized;
+    bool allConnected, allInstantiated, allInitialized;
 
     switch(m_state){
 
@@ -213,7 +221,7 @@ void Master::tick(){
             break;
 
         // Enough slaves connected. Start initializing!
-        initializeSlaves();
+        instantiateSlaves();
         break;
 
     case MASTER_STATE_FETCHING_VERSION:
@@ -223,7 +231,22 @@ void Master::tick(){
         break;
 
     case MASTER_STATE_INSTANTIATING_SLAVES:
+      // Check if all are ready
+      allInstantiated = true;
+      for(int i=0; i<m_slaves.size(); i++){
+        if(!m_slaves[i]->isInitialized()){
+          allInstantiated = false;
+          break;
+        }
+      }
+
+      if(!allInstantiated)
         break;
+
+      // All slaves are instantiated.
+      // Should set initial values here. TODO!
+      initializeSlaves();
+      break;
 
     case MASTER_STATE_INITIALIZING_SLAVES:
         // Check if all are ready
@@ -444,7 +467,7 @@ void Master::onSlaveGetXML(FMIClient * slave){
     tick();
 };
 
-void Master::onSlaveInstanted(FMIClient* slave){
+void Master::onSlaveInstantiated(FMIClient* slave){
     tick();
 };
 
