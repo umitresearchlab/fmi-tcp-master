@@ -10,35 +10,33 @@ FIND_PACKAGE(Threads REQUIRED)
 INCLUDE_DIRECTORIES(${FMITCP_INCLUDE_DIR} ${LACEWING_INCLUDE_DIR})
 LINK_DIRECTORIES(${FMITCP_LIBS_DIR} ${LACEWING_LIBS_DIR})
 
-SET(SRCS
-    src/Connection.cpp
-    src/main.cpp
-    src/Master.cpp
-    src/Logger.cpp
-    src/FMIClient.cpp
-    #src/Slave.cpp
-    src/StrongConnection.cpp
-    src/url_parser.c
-    src/common.cpp
-    src/WeakConnection.cpp
+SET(MASTER_SRCS
+    src/master/Connection.cpp
+    src/master/main.cpp
+    src/master/Master.cpp
+    src/master/Logger.cpp
+    src/master/FMIClient.cpp
+    src/master/StrongConnection.cpp
+    src/master/WeakConnection.cpp
+    src/common/url_parser.c
+    src/common/common.cpp
 )
-SET(HEADERS
-    include/Connection.h
-    include/common.h
-    include/Master.h
-    include/Logger.h
-    include/FMIClient.h
-    #include/Slave.h
-    include/StrongConnection.h
-    include/url_parser.h
-    include/WeakConnection.h
+SET(MASTER_HEADERS
+    include/master/Connection.h
+    include/master/Master.h
+    include/master/Logger.h
+    include/master/FMIClient.h
+    include/master/StrongConnection.h
+    include/master/WeakConnection.h
+    include/common/common.h
+    include/common/url_parser.h
 )
 
 SET(EXECUTABLE_OUTPUT_PATH "${CMAKE_CURRENT_LIST_DIR}/bin")
 
 INCLUDE_DIRECTORIES(include)
 
-ADD_EXECUTABLE(master ${HEADERS} ${SRCS})
+ADD_EXECUTABLE(master ${MASTER_HEADERS} ${MASTER_SRCS})
 
 IF(WIN32)
     TARGET_LINK_LIBRARIES(master

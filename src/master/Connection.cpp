@@ -1,4 +1,4 @@
-#include "Connection.h"
+#include "master/Connection.h"
 
 using namespace fmitcp_master;
 

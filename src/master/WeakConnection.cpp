@@ -1,5 +1,5 @@
-#include "WeakConnection.h"
-#include "Master.h"
+#include "master/WeakConnection.h"
+#include "master/Master.h"
 
 using namespace fmitcp_master;
 

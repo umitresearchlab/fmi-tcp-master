@@ -5,8 +5,8 @@
 #include <signal.h>
 #include <sstream>
 #include <fmilib.h>
-#include "Master.h"
-#include "common.h"
+#include "master/Master.h"
+#include "common/common.h"
 
 using namespace fmitcp_master;
 

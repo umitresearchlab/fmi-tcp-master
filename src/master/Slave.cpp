@@ -1,4 +1,4 @@
-#include "Slave.h"
+#include "master/Slave.h"
 #include "lacewing.h"
 #include "string.h"
 

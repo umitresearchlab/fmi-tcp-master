@@ -1,5 +1,5 @@
-#include "StrongConnection.h"
-#include "Master.h"
+#include "master/StrongConnection.h"
+#include "master/Master.h"
 
 using namespace fmitcp_master;
 

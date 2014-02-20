@@ -3,13 +3,12 @@
 #include "stdlib.h"
 #include "string.h"
 
-#include "Master.h"
-#include "FMIClient.h"
-#include "Logger.h"
-#include "StrongConnection.h"
-#include "WeakConnection.h"
-#include "Slave.h"
-#include "url_parser.h"
+#include "master/Master.h"
+#include "master/FMIClient.h"
+#include "master/Logger.h"
+#include "master/StrongConnection.h"
+#include "master/WeakConnection.h"
+#include "common/url_parser.h"
 
 using namespace fmitcp_master;
 

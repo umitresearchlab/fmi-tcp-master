@@ -1,8 +1,8 @@
 #include <fmitcp/Client.h>
 #include <fmitcp/Logger.h>
 
-#include "Master.h"
-#include "FMIClient.h"
+#include "master/Master.h"
+#include "master/FMIClient.h"
 
 using namespace fmitcp_master;
 

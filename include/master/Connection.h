@@ -1,7 +1,7 @@
 #ifndef CONNECTION_H_
 #define CONNECTION_H_
 
-#include "FMIClient.h"
+#include "master/FMIClient.h"
 
 namespace fmitcp_master {
 
