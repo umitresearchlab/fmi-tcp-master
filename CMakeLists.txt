@@ -72,35 +72,3 @@ ELSE(WIN32)
     TARGET_LINK_LIBRARIES(master ${LINUXLIBS})
     TARGET_LINK_LIBRARIES(slave  ${LINUXLIBS})
 ENDIF(WIN32)
-
-
-
-
-IF(WIN32)
-  TARGET_LINK_LIBRARIES(slave
-    fmitcp
-    fmilib
-    shlwapi
-    lacewing
-    ws2_32
-    mswsock
-    crypt32
-    secur32
-    mpr
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    protobuf
-    ${CMAKE_THREAD_LIBS_INIT}
-)
-ELSE(WIN32)
-  TARGET_LINK_LIBRARIES(slave
-    fmitcp
-    fmilib
-    dl
-    lacewing
-    ${Boost_FILESYSTEM_LIBRARY}
-    ${Boost_SYSTEM_LIBRARY}
-    ${PROTOBUF_LIBRARY}
-    ${CMAKE_THREAD_LIBS_INIT}
-)
-ENDIF(WIN32)
