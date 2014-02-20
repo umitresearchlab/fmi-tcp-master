@@ -1,4 +1,3 @@
-#include "Master.h"
 #include <string>
 #include <fmitcp/Client.h>
 #include <fmitcp/common.h>
@@ -6,37 +5,10 @@
 #include <signal.h>
 #include <sstream>
 #include <fmilib.h>
+#include "Master.h"
+#include "common.h"
 
-using namespace fmitcp;
-
-// Define own client
-class MyFMIClient : public Client {
-public:
-    MyFMIClient(EventPump* pump) : Client(pump) {};
-    ~MyFMIClient(){};
-
-    void onConnect(){
-        fmi2_import_do_step(0,0,0.0,0.1,true);
-    };
-
-    void on_fmi2_import_do_step_res(int message_id, fmitcp_proto::fmi2_status_t status){
-        fmi2_import_instantiate_slave(0,0,"","",true);
-    };
-
-    void on_fmi2_import_instantiate_slave_res(int message_id, fmitcp_proto::jm_status_enu_t status){
-        m_pump->exitEventLoop();
-    }
-
-    void onDisconnect(){
-        //m_logger.log(Logger::DEBUG,"MyFMIClient::onDisconnect\n");
-        m_pump->exitEventLoop();
-    };
-
-    void onError(string err){
-        m_logger.log(Logger::DEBUG,"MyFMIClient::onError\n");
-        m_pump->exitEventLoop();
-    };
-};
+using namespace fmitcp_master;
 
 void printHelp(){
     printf("HELP PAGE: TODO\n");fflush(NULL);
@@ -44,21 +16,31 @@ void printHelp(){
 
 int main(int argc, char *argv[] ) {
 
-    printf("FMI Master %s\n",FMITCP_VERSION);fflush(NULL);
+    printf("FMI Master %s\n",FMITCPMASTER_VERSION);fflush(NULL);
 
-    /*
     Logger logger;
     Master master(logger);
     master.setTimeStep(0.1);
     master.setEnableEndTime(false);
     master.setWeakMethod(PARALLEL);
-    */
 
-    int j, numScanned;
     const char* connectionsArg;
-    int n, skip, l, cont, i;
+    int i, j;
     string hostName = "localhost";
     long port = 3000;
+
+    // Connections
+    vector<int> strong_slaveA;
+    vector<int> strong_slaveB;
+    vector<int> strong_connA;
+    vector<int> strong_connB;
+
+    vector<int> weak_slaveA;
+    vector<int> weak_slaveB;
+    vector<int> weak_connA;
+    vector<int> weak_connB;
+
+    vector<int> slave_ids;
 
     for (j = 1; j < argc; j++) {
         std::string arg = argv[j];
@@ -66,10 +48,6 @@ int main(int argc, char *argv[] ) {
 
         if (arg == "-h" || arg == "--help") {
             printHelp();
-            return EXIT_SUCCESS;
-
-        } else if (arg == "--version") {
-            printf("%s\n",FMITCP_VERSION);
             return EXIT_SUCCESS;
 
         } else if((arg == "--port" || arg == "-p") && !last) {
@@ -86,12 +64,7 @@ int main(int argc, char *argv[] ) {
         } else if (arg == "--host" && !last) {
             hostName = argv[j+1];
 
-        } else if (arg ==  "--debug") {
-            // debugFlag = 1;
-            // Todo: set flag in logger
-
         } else if (arg == "--timeStep" && !last) {
-            /*
             std::string nextArg = argv[j+1];
             double timeStepSize = ::atof(nextArg.c_str());
             j++;
@@ -102,10 +75,12 @@ int main(int argc, char *argv[] ) {
             }
 
             master.setTimeStep(timeStepSize);
-            */
+
+        } else if (arg == "--version") {
+            printf("%s\n",FMITCPMASTER_VERSION);
+            return EXIT_SUCCESS;
 
         } else if ((arg == "-t" || arg == "--stopAfter") && !last) {
-            /*
             std::string nextArg = argv[j+1];
             double endTime = ::atof(nextArg.c_str());
             j++;
@@ -117,10 +92,8 @@ int main(int argc, char *argv[] ) {
 
             master.setEnableEndTime(true);
             master.setEndTime(endTime);
-            */
 
-        } else if ((arg == "-m" || arg == "--method") && !last) {
-            /*
+        } else if ((arg == "-wm" || arg == "--weakMethod") && !last) {
             std::string nextArg = argv[j+1];
             j++;
 
@@ -135,29 +108,38 @@ int main(int argc, char *argv[] ) {
                 return EXIT_FAILURE;
 
             }
-            */
+
+        } else if ((arg == "-wc" || arg == "--weakConnections") && !last) {
+
+        } else if ((arg == "-sc" || arg == "--strongConnections") && !last) {
+            std::string nextArg = argv[j+1];
+            j++;
+
+            // Get connections
+            vector<string> conns = split(nextArg,':');
+            for(i=0; i<conns.size(); i++){
+                vector<string> quad = split(conns[i],',');
+                strong_slaveA.push_back(string_to_int(quad[0]));
+                strong_slaveB.push_back(string_to_int(quad[1]));
+                strong_connA .push_back(string_to_int(quad[2]));
+                strong_connB .push_back(string_to_int(quad[3]));
+            }
+
+        } else if (arg ==  "--debug") {
+            // debugFlag = 1;
+            // Todo: set flag in logger
 
         } else {
             // Assume URI to slave
-            //master.connectSlave(arg);
+            slave_ids.push_back(master.connectSlave(arg));
         }
     }
 
-    //int slaveA = master.connectSlave("tcp://granular.cs.umu.se:3001");
-    //int slaveB = master.connectSlave("tcp://granular.cs.umu.se:3002");
-    /*int valueReferenceA = 0,
-        valueReferenceB = 0,
-        connectorReferenceA = 0,
-        connectorReferenceB = 0;
-    master.createWeakConnection(slaveA, slaveB, valueReferenceA, valueReferenceB);
-    master.createStrongConnection(slaveA, slaveB, connectorReferenceA, connectorReferenceB);
-    master.simulate();
-    */
+    // Set connections
+    for(i=0; i<strong_slaveA.size(); i++)
+        master.createStrongConnection(strong_slaveA[i], strong_slaveB[i], strong_connA[i], strong_connB[i]);
 
-    EventPump pump;
-    MyFMIClient client(&pump);
-    client.connect(hostName,port);
-    pump.startEventLoop();
+    master.simulate();
 
     return 0;
 }

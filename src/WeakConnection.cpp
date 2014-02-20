@@ -1,9 +1,10 @@
 #include "WeakConnection.h"
+#include "Master.h"
 
-using namespace fmitcp;
+using namespace fmitcp_master;
 
-WeakConnection::WeakConnection( Slave* slaveA,
-                                Slave* slaveB,
+WeakConnection::WeakConnection( FMIClient* slaveA,
+                                FMIClient* slaveB,
                                 int valueRefA,
                                 int valueRefB ) : Connection(slaveA, slaveB){
     m_valueRefA = valueRefA;

@@ -1,42 +1,17 @@
+#include <string>
+#include <fmitcp/EventPump.h>
+#include "stdlib.h"
+#include "string.h"
+
 #include "Master.h"
+#include "FMIClient.h"
 #include "Logger.h"
 #include "StrongConnection.h"
 #include "WeakConnection.h"
 #include "Slave.h"
-#include "string.h"
-#include "stdlib.h"
 #include "url_parser.h"
-#include <string>
 
-using namespace fmitcp;
-
-/*
- * @brief Parses the result like fmiStepSize=0.200000
- * @param data - represents the full result data.
- * @param name - represents the name in the result data e.g fmiStepSize=
- * @param size - the size of the data.
- *
- * Make a new string with size of the value. Copy the string where name= is finished until value is end.
- * Convert the string to double using atof. Free the temporary str before returning.
- *
- */
-double unparseDoubleResult(const char* data, const char* name, long size) {
-  int valueLength = strlen(name);
-  char* str = (char*)malloc(size - valueLength);
-  strncpy(str, data+valueLength, size - valueLength);
-  double res = atof(str);
-  free(str);
-  return res;
-}
-
-int unparseIntResult(const char* data, const char* name, long size) {
-  int valueLength = strlen(name);
-  char* str = (char*)malloc(size - valueLength);
-  strncpy(str, data+valueLength, size - valueLength);
-  int res = atoi(str);
-  free(str);
-  return res;
-}
+using namespace fmitcp_master;
 
 Master::Master(){
     init();
@@ -48,8 +23,8 @@ Master::Master(const Logger& logger){
 }
 
 void Master::init(){
-    // One pump for all clients
-    m_pump = lw_eventpump_new();
+
+    m_pump = new fmitcp::EventPump();
 
     // Set state
     m_state = MASTER_IDLE;
@@ -62,8 +37,8 @@ void Master::init(){
 }
 
 Master::~Master(){
-    lw_eventpump_post_eventloop_exit(m_pump);
-    lw_pump_delete(m_pump);
+    /*lw_eventpump_post_eventloop_exit(m_pump);
+    lw_pump_delete(m_pump);*/
 
     // Delete all connections
     for (int i = 0; i < m_strongConnections.size(); ++i){
@@ -79,6 +54,7 @@ Master::~Master(){
     }
 }
 
+/*
 void Master_clientOnConnect(lw_client client) {
     Master * master = (Master*)lw_stream_tag(client);
     master->clientConnected(client);
@@ -103,7 +79,7 @@ void Master_clientOnError(lw_client client, lw_error error) {
     }
 
     lw_stream_delete(client);
-}
+}*/
 
 void Master::initializeSlaves(){
     m_state = MASTER_INITIALIZING;
@@ -127,29 +103,17 @@ void Master::transferWeakConnectionData(){
 }
 
 int Master::connectSlave(std::string uri){
-
     struct parsed_url * url = parse_url(uri.c_str());
     long port = atoi(url->port);
 
-    // Create new client
-    lw_client client = lw_client_new(m_pump);
+    FMIClient* client = new FMIClient(this,m_pump);
+    client->connect(url->host,port);
+    m_slaves.push_back(client);
 
-    // Set the master object as tag
-    lw_stream_set_tag(client, (void*)this);
-
-    // connect the event handlers
-    lw_client_on_connect(   client, Master_clientOnConnect);
-    lw_client_on_data(      client, Master_clientOnData);
-    lw_client_on_disconnect(client, Master_clientOnDisconnect);
-    lw_client_on_error(     client, Master_clientOnError);
-
-    Slave * slave = new Slave(client);
     int slaveId = m_slaveIdCounter++;
-    slave->setId(slaveId);
-    m_slaves.push_back(slave);
+    client->setId(slaveId);
 
-    // connect the client to the server
-    lw_client_connect(client, url->host, port);
+    m_logger.log(Logger::DEBUG,"Connected slave id=%d: %s\n",slaveId,uri.c_str());
 
     parsed_url_free(url);
 
@@ -157,22 +121,10 @@ int Master::connectSlave(std::string uri){
 }
 
 void Master::simulate(){
-
-    // start the eventloop
-    if(m_slaves.size())
-        lw_eventpump_start_eventloop(m_pump);
+    m_pump->startEventLoop();
 }
 
-Slave * Master::getSlave(lw_client client){
-    for(int i=0; i<m_slaves.size(); i++){
-        if(m_slaves[i]->getClient() == client){
-            return m_slaves[i];
-        }
-    }
-    return NULL;
-}
-
-Slave * Master::getSlave(int id){
+FMIClient * Master::getSlave(int id){
     for(int i=0; i<m_slaves.size(); i++){
         if(m_slaves[i]->getId() == id){
             return m_slaves[i];
@@ -181,9 +133,8 @@ Slave * Master::getSlave(int id){
     return NULL;
 }
 
-void Master::clientConnected(lw_client client){
+void Master::clientConnected(FMIClient * client){
     m_logger.log(Logger::NETWORK,"Connected to slave.\n");
-    Slave * slave = getSlave(client);
 
     // Check if all slaves are connected.
     bool allConnected = true;
@@ -200,10 +151,11 @@ void Master::clientConnected(lw_client client){
     // Enough slaves connected. Start simulation!
     for(int i=0; i<m_slaves.size(); i++){
         m_logger.log(Logger::DEBUG,"Initializing slave %d...\n", i);
-        m_slaves[i]->initialize(m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
+        m_slaves[i]->fmi2_import_initialize_slave(0, 0, m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
     }
 }
 
+/*
 void Master::clientDisconnected(lw_client client){
     m_logger.log(Logger::NETWORK,"Disconnected slave.\n");
 
@@ -217,21 +169,22 @@ void Master::clientDisconnected(lw_client client){
         }
     }
 
-    // No slaves left - try exit
+    // No slaves left - exit
     if(m_slaves.size() == 0)
         lw_eventpump_post_eventloop_exit(m_pump);
 }
+*/
+    /*
 
 void Master::clientData(lw_client client, const char* data, long size){
     m_logger.log(Logger::NETWORK,"<-- %s\n",data);
-    Slave * slave = getSlave(client);
+    int slave = getSlave(client);
 
     char* response = (char*)malloc(size+1);
     strncpy(response, data, size);
     response[size] = '\0';
     //debugPrint(debugFlag, stderr, "<-- %d: %s\n", clientIndex, response);fflush(NULL);
 
-    /*
     char* token;
     token = strtok(response, "\n");
     while (token != NULL) {
@@ -341,8 +294,8 @@ void Master::clientData(lw_client client, const char* data, long size){
         token = strtok(NULL, "\n");
       }
       free(response);
-      */
 }
+      */
 
 void Master::createStrongConnection(int slaveA, int slaveB, int connectorA, int connectorB){
     m_strongConnections.push_back(new StrongConnection(getSlave(slaveA),getSlave(slaveB),connectorA,connectorB));
@@ -368,7 +321,7 @@ void Master::setWeakMethod(WeakCouplingAlgorithm algorithm){
     m_method = algorithm;
 }
 
-
+/*
 bool Master::hasAllClientsState(Slave::SlaveState state){
     for(int i=0; i<m_slaves.size(); i++){
         if(m_slaves[i]->getState() != state)
@@ -376,3 +329,4 @@ bool Master::hasAllClientsState(Slave::SlaveState state){
     }
     return true;
 }
+*/

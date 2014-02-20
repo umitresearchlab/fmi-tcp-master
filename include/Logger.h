@@ -1,9 +1,9 @@
-#ifndef LOGGER_H_
-#define LOGGER_H_
+#ifndef MASTER_LOGGER_H_
+#define MASTER_LOGGER_H_
 
 #include <stdarg.h>
 
-namespace fmitcp {
+namespace fmitcp_master {
 
     class Logger {
     public:
@@ -15,7 +15,7 @@ namespace fmitcp {
 
         Logger();
         virtual ~Logger();
-        virtual void log(LogMessageType type, const char * format, ...);
+        virtual void log(fmitcp_master::Logger::LogMessageType type, const char * format, ...);
     };
 
 };

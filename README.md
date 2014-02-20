@@ -24,7 +24,7 @@ Prerequisities are [Lacewing](http://lacewing-project.org/), [Protobuf](https://
         --timeStep [NUMBER]
                 Timestep size. Default is 0.1.
 
-        --endTime [NUMBER]
+        --stopAfter [NUMBER]
             End simulation time in seconds. Default is 1.0.
 
         --weakMethod [STRING]

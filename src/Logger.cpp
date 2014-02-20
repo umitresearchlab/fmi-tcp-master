@@ -1,17 +1,15 @@
 #include "Logger.h"
 #include "stdio.h"
 
-using namespace fmitcp;
-
-Logger::Logger(){
+fmitcp_master::Logger::Logger(){
 
 }
 
-Logger::~Logger(){
+fmitcp_master::Logger::~Logger(){
 
 }
 
-void Logger::log(Logger::LogMessageType type, const char * format, ...){
+void fmitcp_master::Logger::log(fmitcp_master::Logger::LogMessageType type, const char * format, ...){
     va_list args;
     va_start(args, format);
     vfprintf(stdout, format, args);

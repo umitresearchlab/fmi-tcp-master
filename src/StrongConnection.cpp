@@ -1,10 +1,10 @@
 #include "StrongConnection.h"
-#include "Slave.h"
+#include "Master.h"
 
-using namespace fmitcp;
+using namespace fmitcp_master;
 
-StrongConnection::StrongConnection( Slave* slaveA,
-                                    Slave* slaveB,
+StrongConnection::StrongConnection( FMIClient* slaveA,
+                                    FMIClient* slaveB,
                                     int connectorRefA,
                                     int connectorRefB ) : Connection(slaveA,slaveB) {
     m_connectorRefA = connectorRefA;

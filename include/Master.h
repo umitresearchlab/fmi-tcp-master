@@ -2,15 +2,19 @@
 #define MASTER_H_
 
 #include <vector>
+#include "lacewing.h"
+#include <limits.h>
+#include <string>
+#include <fmitcp/EventPump.h>
+
 #include "StrongConnection.h"
 #include "WeakConnection.h"
 #include "Slave.h"
 #include "Logger.h"
-#include "lacewing.h"
-#include <limits.h>
-#include <string>
 
-namespace fmitcp {
+namespace fmitcp_master {
+
+    class FMIClient;
 
     enum WeakCouplingAlgorithm {
         SERIAL = 1,
@@ -30,11 +34,11 @@ namespace fmitcp {
     private:
         std::vector<WeakConnection*> m_weakConnections;
         std::vector<StrongConnection*> m_strongConnections;
-        std::vector<Slave*> m_slaves;
+        std::vector<FMIClient*> m_slaves;
         std::vector<int> m_slave_ids;
-        lw_pump m_pump;
+        fmitcp::EventPump * m_pump;
         int m_slaveIdCounter;
-        Logger m_logger;
+        fmitcp_master::Logger m_logger;
         WeakCouplingAlgorithm m_method;
         MasterState m_state;
         double m_relativeTolerance;
@@ -53,11 +57,10 @@ namespace fmitcp {
         /// Connects to a slave and gets info about it
         int connectSlave(std::string uri);
 
-        Slave * getSlave(lw_client client);
-        Slave * getSlave(int id);
-        void clientConnected(lw_client client);
-        void clientDisconnected(lw_client client);
-        void clientData(lw_client client, const char* data, long size);
+        FMIClient * getSlave(int id);
+        void clientConnected(FMIClient * client);
+        //void clientDisconnected(lw_client client);
+        //void clientData(lw_client client, const char* data, long size);
 
         void setTimeStep(double timeStep);
         void setEnableEndTime(bool enable);
@@ -74,7 +77,7 @@ namespace fmitcp {
 
         void initializeSlaves();
 
-        bool hasAllClientsState(Slave::SlaveState state);
+        //bool hasAllClientsState(Slave::SlaveState state);
     };
 };
 

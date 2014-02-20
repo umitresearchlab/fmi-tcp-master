@@ -14,15 +14,21 @@ SET(SRCS
     src/Connection.cpp
     src/main.cpp
     src/Master.cpp
-    src/Slave.cpp
+    src/Logger.cpp
+    src/FMIClient.cpp
+    #src/Slave.cpp
     src/StrongConnection.cpp
     src/url_parser.c
+    src/common.cpp
     src/WeakConnection.cpp
 )
 SET(HEADERS
     include/Connection.h
+    include/common.h
     include/Master.h
-    include/Slave.h
+    include/Logger.h
+    include/FMIClient.h
+    #include/Slave.h
     include/StrongConnection.h
     include/url_parser.h
     include/WeakConnection.h

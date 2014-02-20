@@ -2,9 +2,8 @@
 #define STRONGCONNECTION_H_
 
 #include "Connection.h"
-#include "Slave.h"
 
-namespace fmitcp {
+namespace fmitcp_master {
 
     class StrongConnection : public Connection {
     private:
@@ -12,8 +11,8 @@ namespace fmitcp {
         int m_connectorRefB;
 
     public:
-        StrongConnection(Slave* slaveA,
-                         Slave* slaveB,
+        StrongConnection(FMIClient* slaveA,
+                         FMIClient* slaveB,
                          int connectorRefA,
                          int connectorRefB );
         ~StrongConnection();

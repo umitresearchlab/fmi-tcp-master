@@ -2,8 +2,9 @@
 #define WEAKCONNECTION_H_
 
 #include "Connection.h"
+#include "FMIClient.h"
 
-namespace fmitcp {
+namespace fmitcp_master {
 
     class WeakConnection : public Connection {
 
@@ -12,8 +13,8 @@ namespace fmitcp {
         int m_valueRefB;
 
     public:
-        WeakConnection( Slave* slaveA,
-                        Slave* slaveB,
+        WeakConnection( FMIClient* slaveA,
+                        FMIClient* slaveB,
                         int valueRefA,
                         int valueRefB );
         ~WeakConnection();

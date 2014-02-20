@@ -1,9 +1,9 @@
 #include "Connection.h"
 
-using namespace fmitcp;
+using namespace fmitcp_master;
 
-Connection::Connection( Slave * slaveA,
-                        Slave * slaveB ){
+Connection::Connection( FMIClient * slaveA,
+                        FMIClient * slaveB ){
     m_slaveA = slaveA;
     m_slaveB = slaveB;
 }
@@ -19,11 +19,11 @@ void Connection::setState(ConnectionState s){
     s = m_state;
 }
 
-Slave * Connection::getSlaveA(){
+FMIClient * Connection::getSlaveA(){
     return m_slaveA;
 }
 
-Slave * Connection::getSlaveB(){
+FMIClient * Connection::getSlaveB(){
     return m_slaveB;
 }
 

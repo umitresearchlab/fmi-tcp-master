@@ -2,7 +2,7 @@
 #include "lacewing.h"
 #include "string.h"
 
-using namespace fmitcp;
+using namespace fmitcp_master;
 
 Slave::Slave(lw_client client){
     m_client = client;

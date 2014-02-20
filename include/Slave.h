@@ -3,7 +3,7 @@
 
 #include "lacewing.h"
 
-namespace fmitcp {
+namespace fmitcp_master {
 
     /// Container for slave data from the master's perspective.
     class Slave {

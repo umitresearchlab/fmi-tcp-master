@@ -1,9 +1,9 @@
 #ifndef CONNECTION_H_
 #define CONNECTION_H_
 
-#include "Slave.h"
+#include "FMIClient.h"
 
-namespace fmitcp {
+namespace fmitcp_master {
 
     enum ConnectionState {
       CONNECTION_INVALID,
@@ -14,19 +14,19 @@ namespace fmitcp {
     class Connection {
 
     protected:
-        Slave* m_slaveA;
-        Slave* m_slaveB;
+        FMIClient* m_slaveA;
+        FMIClient* m_slaveB;
         ConnectionState m_state;
 
     public:
-        Connection(Slave* slaveA, Slave* slaveB);
+        Connection(FMIClient* slaveA, FMIClient* slaveB);
         virtual ~Connection();
 
         ConnectionState getState();
         void setState(ConnectionState s);
 
-        Slave * getSlaveA();
-        Slave * getSlaveB();
+        FMIClient * getSlaveA();
+        FMIClient * getSlaveB();
     };
 };
 
