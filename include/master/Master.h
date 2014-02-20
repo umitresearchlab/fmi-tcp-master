@@ -22,11 +22,15 @@ namespace fmitcp_master {
     };
 
     enum MasterState {
-        MASTER_IDLE,
-        MASTER_INITIALIZING,
-        MASTER_TRANSFERRING_WEAK,
-        MASTER_TRANSFERRING_STRONG,
-        MASTER_STEPPING
+        MASTER_STATE_START,
+        MASTER_STATE_CONNECTING_SLAVES,
+        MASTER_STATE_FETCHING_VERSION,
+        MASTER_STATE_FETCHING_XML,
+        MASTER_STATE_INSTANTIATING_SLAVES,
+        MASTER_STATE_INITIALIZING_SLAVES,
+        MASTER_STATE_TRANSFERRING_WEAK,
+        MASTER_STATE_TRANSFERRING_STRONG,
+        MASTER_STATE_STEPPING_SLAVES
     };
 
     class Master {
@@ -78,6 +82,9 @@ namespace fmitcp_master {
         void initializeSlaves();
 
         //bool hasAllClientsState(Slave::SlaveState state);
+
+        /// "State machine" tick
+        void tick();
     };
 };
 

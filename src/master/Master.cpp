@@ -26,7 +26,7 @@ void Master::init(){
     m_pump = new fmitcp::EventPump();
 
     // Set state
-    m_state = MASTER_IDLE;
+    m_state = MASTER_STATE_START;
     m_slaveIdCounter = 0;
 
     m_relativeTolerance = 0.0001;
@@ -36,8 +36,6 @@ void Master::init(){
 }
 
 Master::~Master(){
-    /*lw_eventpump_post_eventloop_exit(m_pump);
-    lw_pump_delete(m_pump);*/
 
     // Delete all connections
     for (int i = 0; i < m_strongConnections.size(); ++i){
@@ -81,7 +79,7 @@ void Master_clientOnError(lw_client client, lw_error error) {
 }*/
 
 void Master::initializeSlaves(){
-    m_state = MASTER_INITIALIZING;
+    m_state = MASTER_STATE_INITIALIZING_SLAVES;
 
     for (int i = 0; i < m_slaves.size(); ++i){
 
@@ -91,7 +89,7 @@ void Master::initializeSlaves(){
 }
 
 void Master::transferWeakConnectionData(){
-    m_state = MASTER_TRANSFERRING_WEAK;
+    m_state = MASTER_STATE_TRANSFERRING_WEAK;
 
     // Assume parallel
     for (int i = 0; i < m_weakConnections.size(); ++i){
@@ -133,7 +131,7 @@ FMIClient * Master::getSlave(int id){
 }
 
 void Master::slaveConnected(FMIClient * client){
-    m_logger.log(Logger::NETWORK,"Connected to slave.\n");
+    m_logger.log(Logger::NETWORK,"Connected to slave %d.\n",client->getId());
 
     // Check if all slaves are connected.
     bool allConnected = true;
@@ -174,6 +172,20 @@ void Master::slaveDisconnected(FMIClient* client){
     // No slaves left - exit
     if(m_slaves.size() == 0)
         m_pump->exitEventLoop();
+}
+
+void Master::tick(){
+    switch(m_state){
+    case MASTER_STATE_START: break;
+    case MASTER_STATE_CONNECTING_SLAVES: break;
+    case MASTER_STATE_FETCHING_VERSION: break;
+    case MASTER_STATE_FETCHING_XML: break;
+    case MASTER_STATE_INSTANTIATING_SLAVES: break;
+    case MASTER_STATE_INITIALIZING_SLAVES: break;
+    case MASTER_STATE_TRANSFERRING_WEAK: break;
+    case MASTER_STATE_TRANSFERRING_STRONG: break;
+    case MASTER_STATE_STEPPING_SLAVES: break;
+    }
 }
 
 /*
