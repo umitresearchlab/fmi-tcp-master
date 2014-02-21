@@ -8,12 +8,14 @@
 using namespace fmitcp_master;
 
 void printHelp(){
-    printf("Usage: ./test [OPTIONS]\n\
+    printf("Usage: ./test [OPTIONS] FMUPATH\n\
 \n\
 [OPTIONS]\n\
     --host [HOST]   The host. Defaults to 'localhost'.\n\
     --port [PORT]   A free port to use.\n\
-    fmu");
+\n\
+FMUPATH\n\
+    Path to an FMU to run.\n\n");
 }
 
 int main(int argc, char *argv[] ) {
@@ -47,6 +49,7 @@ int main(int argc, char *argv[] ) {
 
         } else if ((arg == "-l" || arg == "--logging") && !last) {
           std::string nextArg = argv[j+1];
+          j++;
 
           std::istringstream ss(nextArg);
           ss >> logging;
@@ -77,6 +80,7 @@ int main(int argc, char *argv[] ) {
 
         } else if((arg == "--port" || arg == "-p") && !last) {
             std::string nextArg = argv[j+1];
+            j++;
 
             port = string_to_int(nextArg);
 
@@ -87,6 +91,7 @@ int main(int argc, char *argv[] ) {
 
         } else if (arg == "--host" && !last) {
             hostName = argv[j+1];
+            j++;
 
         } else {
           fmuPath = argv[j];
