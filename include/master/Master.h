@@ -7,6 +7,7 @@
 #include <string>
 #include <fmitcp/EventPump.h>
 #include <fmitcp/Logger.h>
+#include <sc/Solver.h>
 
 #include "master/StrongConnection.h"
 #include "master/WeakConnection.h"
@@ -99,6 +100,9 @@ namespace fmitcp_master {
         bool m_endTimeDefined;
         /// Current time
         double m_time;
+        sc::Solver m_strongCouplingSolver;
+        std::vector<sc::Slave*> m_strongCouplingSlaves;
+        std::vector<sc::Connector*> m_strongCouplingConnectors;
 
     public:
 

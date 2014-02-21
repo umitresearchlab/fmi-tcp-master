@@ -46,6 +46,14 @@ Master::~Master(){
     for (int i = 0; i < m_slaves.size(); ++i){
         delete m_slaves[i];
     }
+
+    // Delete all strong coupling data
+    for(int i=0; i<m_strongCouplingSlaves.size(); i++){
+        delete m_strongCouplingSlaves[i];
+    }
+    for(int i=0; i<m_strongCouplingConnectors.size(); i++){
+        delete m_strongCouplingConnectors[i];
+    }
 }
 
 fmitcp::EventPump * Master::getEventPump(){
@@ -76,6 +84,33 @@ FMIClient* Master::connectSlave(std::string uri){
 }
 
 void Master::simulate(){
+
+    // If strong coupling was added, we need to set up the system for that
+    if(m_strongConnections.size() > 0){
+
+        // Create sc-slaves for each slave
+        for(int i=0; i<m_slaves.size(); i++){
+            m_strongCouplingSlaves.push_back(new sc::Slave());
+        }
+
+        // Create an sc-connector for each strong coupling connector
+        for(int i=0; i<m_strongConnections.size(); i++){
+
+            sc::Slave* slave = m_strongCouplingSlaves[i];
+
+            // Create connector at center of mass of the body
+            sc::Connector * conn = new sc::Connector();
+            slave->addConnector(conn);
+            m_strongCouplingConnectors.push_back(conn);
+
+            // So we can reach it later
+            conn->m_userData = (void*)m_strongConnections[i];
+
+            // Note: Must add slave to solver *after* adding connectors to slave
+            m_strongCouplingSolver.addSlave(slave);
+        }
+    }
+
     m_pump->startEventLoop();
     tick();
 }
