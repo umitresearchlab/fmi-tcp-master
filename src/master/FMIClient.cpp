@@ -10,6 +10,7 @@ FMIClient::FMIClient(Master* master, fmitcp::EventPump* pump) : fmitcp::Client(p
     m_master = master;
     m_initialized = false;
     m_state = FMICLIENT_STATE_START;
+    m_isInstantiated = false;
 };
 
 FMIClient::~FMIClient(){

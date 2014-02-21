@@ -11,7 +11,25 @@ namespace fmitcp_master {
     enum FMIClientState {
         FMICLIENT_STATE_START,
         FMICLIENT_STATE_WAITING_INSTANTIATE_SLAVE,
+        FMICLIENT_STATE_DONE_INSTANTIATE_SLAVE,
+        FMICLIENT_STATE_WAITING_INITIALIZE_SLAVE,
+        FMICLIENT_STATE_DONE_INITIALIZE_SLAVE,
+        FMICLIENT_STATE_WAITING_DIRECTIONALDERIVATIVES,
+        FMICLIENT_STATE_DONE_DIRECTIONALDERIVATIVES,
         FMICLIENT_STATE_WAITING_DOSTEP,
+        FMICLIENT_STATE_DONE_DOSTEP,
+        FMICLIENT_STATE_WAITING_SET_REAL,
+        FMICLIENT_STATE_DONE_SET_REAL,
+        FMICLIENT_STATE_WAITING_GET_REAL,
+        FMICLIENT_STATE_DONE_GET_REAL,
+        FMICLIENT_STATE_WAITING_SET_STATE,
+        FMICLIENT_STATE_DONE_SET_STATE,
+        FMICLIENT_STATE_WAITING_GET_STATE,
+        FMICLIENT_STATE_DONE_GET_STATE,
+        FMICLIENT_STATE_WAITING_FREE_STATE,
+        FMICLIENT_STATE_DONE_FREE_STATE,
+        FMICLIENT_STATE_WAITING_TERMINATE_SLAVE,
+        FMICLIENT_STATE_DONE_TERMINATE_SLAVE,
     };
 
     class FMIClient : public fmitcp::Client {
@@ -21,9 +39,12 @@ namespace fmitcp_master {
         Master * m_master;
         string m_xml;
         bool m_initialized;
-        FMIClientState m_state;
 
     public:
+
+        FMIClientState m_state;
+        bool m_isInstantiated;
+
         FMIClient(Master* master, fmitcp::EventPump* pump);
         virtual ~FMIClient();
 

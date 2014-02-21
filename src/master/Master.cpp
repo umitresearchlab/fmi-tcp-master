@@ -153,6 +153,7 @@ void Master::slaveDisconnected(FMIClient* client){
     }
 
     // No slaves left - exit
+    // TODO: Move this to the tick function?
     if(m_slaves.size() == 0)
         m_pump->exitEventLoop();
 }
@@ -161,6 +162,7 @@ void Master::instantiateSlaves() {
   setState(MASTER_STATE_INSTANTIATING_SLAVES);
   for(int i=0; i<m_slaves.size(); i++){
     m_logger.log(fmitcp::Logger::LOG_DEBUG,"Instantiating slave %d...\n", i);
+    m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_INSTANTIATE_SLAVE;
     m_slaves[i]->fmi2_import_instantiate(0);
   }
 }
@@ -169,15 +171,40 @@ void Master::initializeSlaves() {
     setState(MASTER_STATE_INITIALIZING_SLAVES);
     for(int i=0; i<m_slaves.size(); i++){
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"Initializing slave %d...\n", i);
+        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_INITIALIZE_SLAVE;
         m_slaves[i]->fmi2_import_initialize_slave(0, 0, m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
     }
 }
 
-void Master::stepSlaves(){
+void Master::fetchDirectionalDerivatives() {
+    // TODO: This call needs seeds from the strong coupling library, but that is not available yet!
+    setState(MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES);
+    for(int i=0; i<m_slaves.size(); i++){
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting directional derivatives from slave %d...\n", i);
+        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_DIRECTIONALDERIVATIVES;
+        // TODO fill these with seeds
+        std::vector<int> v_ref;
+        std::vector<int> z_ref;
+        std::vector<double> dv;
+        m_slaves[i]->fmi2_import_get_directional_derivative(0, 0, v_ref, z_ref, dv);
+    }
+}
+
+void Master::getSlaveStates() {
+    setState(MASTER_STATE_FETCHING_STATES);
+    for(int i=0; i<m_slaves.size(); i++){
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting state from slave %d...\n", i);
+        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_GET_STATE;
+        m_slaves[i]->fmi2_import_get_fmu_state(0,0);
+    }
+}
+
+void Master::stepSlaves(bool forFutureVelocities){
     setState(MASTER_STATE_STEPPING_SLAVES);
     for(int i=0; i<m_slaves.size(); i++){
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"Stepping slave %d...\n", i);
         //m_slaves[i]->fmi2_import_do_step(0, 0, m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
+        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_DOSTEP;
         m_slaves[i]->fmi2_import_do_step(0,0,m_time,m_timeStep,true);
     }
     m_time += m_timeStep;
@@ -200,9 +227,49 @@ void Master::setState(MasterState state){
 
 }
 
+bool Master::allClientsHaveState(FMIClientState state){
+    for(int i=0; i<m_slaves.size(); i++){
+        if(m_slaves[i]->m_state != state)
+            return false;
+    }
+    return true;
+}
+
+
 void Master::tick(){
 
-    bool allConnected, allInstantiated, allInitialized;
+    /*
+
+    === The simulation loop ===
+
+    Start everything up:
+    1. instantiate
+    2. initialize
+
+    Simulation loop runs until we reach end time:
+    3. simulation loop
+
+        We need velocities one step ahead for the strong coupling:
+        3.1 getState
+        3.2 doStep
+        3.3 getReal       (get only velocities)
+        3.4 setState      (rewind)
+
+        And also directional derivatives:
+        3.5 getDirecionalDerivatives
+
+        The resulting strong coupling constraint forces are applied:
+        3.6 setReal       (strong coupling forces)
+
+        We transfer values from weak coupling:
+        3.7 setReal
+
+        Final step.
+        3.8 doStep
+
+     */
+
+    bool allConnected, allInstantiated, allInitialized, allReady;
 
     switch(m_state){
 
@@ -232,15 +299,7 @@ void Master::tick(){
 
     case MASTER_STATE_INSTANTIATING_SLAVES:
       // Check if all are ready
-      allInstantiated = true;
-      for(int i=0; i<m_slaves.size(); i++){
-        if(!m_slaves[i]->isInitialized()){
-          allInstantiated = false;
-          break;
-        }
-      }
-
-      if(!allInstantiated)
+      if(!allClientsHaveState(FMICLIENT_STATE_DONE_INSTANTIATE_SLAVE))
         break;
 
       // All slaves are instantiated.
@@ -250,27 +309,53 @@ void Master::tick(){
 
     case MASTER_STATE_INITIALIZING_SLAVES:
         // Check if all are ready
-        allInitialized = true;
-        for(int i=0; i<m_slaves.size(); i++){
-            if(!m_slaves[i]->isInitialized()){
-                allInitialized = false;
-                break;
-            }
-        }
-
-        if(!allInitialized)
+        if(!allClientsHaveState(FMICLIENT_STATE_DONE_INITIALIZE_SLAVE))
             break;
+        // If all are ready, just continue to the case below, start simloop
+
+    case MASTER_STATE_START_SIMLOOP:
 
         // All slaves are initialized.
-        // Should set initial values here. TODO!
-        stepSlaves();
+        if(m_strongConnections.size()){
+            // There are strong connections. We must now get states.
+            getSlaveStates();
+
+        } else if(m_weakConnections.size()){
+            transferWeakConnectionData();
+
+        } else {
+            // No connections at all, we can now do final step
+            stepSlaves(true);
+        }
         break;
 
-    case MASTER_STATE_TRANSFERRING_WEAK:
+
+    case MASTER_STATE_FETCHING_STATES:
+        if(allClientsHaveState(FMICLIENT_STATE_DONE_GET_STATE))
+            fetchDirectionalDerivatives();
+
+        break;
+
+    case MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO:
+        if(allClientsHaveState(FMICLIENT_STATE_DONE_DOSTEP))
+            fetchDirectionalDerivatives();
         break;
 
     case MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES:
+        // All ready?
+        if(!allClientsHaveState(FMICLIENT_STATE_DONE_DIRECTIONALDERIVATIVES))
+            break;
+
+        // All are ready. Need to collect future velocities from them for the strong coupling algo.
+        // Get states
+        getSlaveStates();
+
         break;
+
+    case MASTER_STATE_TRANSFERRING_WEAK:
+        stepSlaves(false);
+        break;
+
 
     case MASTER_STATE_TRANSFERRING_STRONG:
         // Check if all strong coupling forces are applied
@@ -289,145 +374,24 @@ void Master::tick(){
         break;
 
     case MASTER_STATE_STEPPING_SLAVES:
-        // Check if all have stepped
-        bool allReady = true;
-        for(int i=0; i<m_slaves.size(); i++){
-            if(m_slaves[i]->getState() == FMICLIENT_STATE_WAITING_DOSTEP){
-                allReady = false;
-                break;
-            }
-        }
-        if(allReady){
+        if(allClientsHaveState(FMICLIENT_STATE_DONE_DOSTEP)){
             // Next step?
-            if(m_endTimeDefined && m_time < m_endTime){
-                stepSlaves();
+            if((m_endTimeDefined && m_time < m_endTime) || !m_endTimeDefined){
+                //stepSlaves(false);
+                setState(MASTER_STATE_START_SIMLOOP);
+                tick();
+            } else {
+                // We are done with the simulation!
+                setState(MASTER_STATE_DONE);
+                m_pump->exitEventLoop();
             }
         }
         break;
+
+    case MASTER_STATE_DONE:
+        break;
     }
 }
-
-/*
-void Master::clientData(lw_client client, const char* data, long size){
-    m_logger.log(Logger::NETWORK,"<-- %s\n",data);
-    int slave = getSlave(client);
-
-    char* response = (char*)malloc(size+1);
-    strncpy(response, data, size);
-    response[size] = '\0';
-    //debugPrint(debugFlag, stderr, "<-- %d: %s\n", clientIndex, response);fflush(NULL);
-
-    char* token;
-    token = strtok(response, "\n");
-    while (token != NULL) {
-        // debugPrint(debugFlag, stdout, "token = %s\n", token);fflush(NULL);
-        if (strncmp(token, Message::fmiTEndOk, strlen(Message::fmiTEndOk)) == 0) {
-          //sendCommand(client, clientIndex, fmiInstantiateSlave, strlen(fmiInstantiateSlave));
-          slave->instantiate();
-        } else if ((strncmp(token, fmiInstantiateSlaveSuccess, strlen(fmiInstantiateSlaveSuccess)) == 0) ||
-                  (strncmp(token, fmiInstantiateSlaveWarning, strlen(fmiInstantiateSlaveWarning)) == 0)) {
-           // handle fmiInstantiateSlave response. if the response is success then call fmiInitializeSlave
-          m_logger.log(NETWORK,"Slave %d has successfully done Instantiation.\n", slave->getId());
-          slave->initialize();
-
-        } else if (strncmp(token, fmiInstantiateSlaveError, strlen(fmiInitializeSlaveError)) == 0) {
-          m_logger.log(NETWORK,"Could not instantiate model.\n");
-          exit(EXIT_FAILURE);
-
-        } else if (strncmp(token, fmiInitializeSlaveOk, strlen(fmiInitializeSlaveOk)) == 0) {
-            // handle fmiInitializeSlave response. if the response is OK then call setInitialValues
-            m_logger.log(NETWORK,"Slave %d has successfully done Initialization.\n", slave->getId());
-            slave->setInitialValues();
-
-        } else if (strncmp(token, fmiInitializeSlaveError, strlen(fmiInitializeSlaveError)) == 0) {
-          m_logger.log(NETWORK,"Could not initialize model.\n");
-          exit(EXIT_FAILURE);
-
-        } else if ((strncmp(token, setInitialValuesOk, strlen(setInitialValuesOk)) == 0) ||
-            (strncmp(token, fmiSetValueReturn, strlen(fmiSetValueReturn)) == 0) ||
-            (strncmp(token, fmiDoStepOk, strlen(fmiDoStepOk)) == 0)) {
-          // if fmiDoStepOK is returned then just inform user about successful step.
-          if (strncmp(token, fmiDoStepOk, strlen(fmiDoStepOk)) == 0) {
-            m_logger.log(NETWORK,"Slave %d has successfully taken a step.\n", slave->getId());
-          }
-
-          // if no connections just call fmiDoStep
-          if (m_weakConnections.size() == 0) {
-            slave->doStep();
-
-          } else {
-            int allSlavesInitialized = 1;
-            if (strncmp(token, setInitialValuesOk, strlen(setInitialValuesOk)) == 0) {
-              slave->setState(SLAVE_INITIALIZED);
-              allSlavesInitialized = hasAllClientsState(SLAVE_INITIALIZED);
-            }
-            lw_server_client serverClient;
-            switch (m_method) {
-
-            case PARALLEL:
-              if (allSlavesInitialized) {
-                // check the client's connections
-                int i;
-                int found = 0;
-                for (i = 0 ; i < m_weakConnections.size() ; i++) {
-                  WeakConnection * c = m_weakConnections[i];
-                  if (c->getState() == CONNECTION_INVALID) {
-                    //lw_server_client fromClient = findClientByIndex(FMICSServer, c.fromFMU);
-                    //if (fromClient) {     // it might be that the client we want here is already finished.
-                      found = 1;
-                      c->setState(CONNECTION_REQUESTED);
-                      //FMICSServer->connections[i] = c;
-                      //char cmd[50];
-                      //sprintf(cmd, "%s%d", fmiGetValue, c->getValueRefA());
-                      slave->getReal(c->getValueRefA()); //sendCommand(fromClient, c.fromFMU, cmd, strlen(cmd));
-                      break;
-                    //}
-                  }
-                }
-                // if not found then we assume we have fulfilled all the connections of this client so we can now call fmiDoStep.
-                if (!found) {
-                  slave->doStep();
-                }
-              }
-              break;
-
-            }
-          }
-        } else if (strncmp(token, fmiGetValueReturn, strlen(fmiGetValueReturn)) == 0) {
-          double value = unparseDoubleResult(token, fmiGetValueReturn, strlen(token));
-          int i;
-          for (i = 0 ; i < m_weakConnections.size() ; i++) {
-            WeakConnection * c = m_weakConnections[i];
-            if (slave == c->getSlaveA() && c->getState() == CONNECTION_REQUESTED) {
-              //lw_server_client toClient = findClientByIndex(FMICSServer, c.toFMU);
-              c->setState(CONNECTION_COMPLETE);
-              //FMICSServer->connections[i] = c;
-              //char cmd[100];
-              //sprintf(cmd, "%s%d#%s%f", fmiSetValueVr, c.toInputVR, fmiSetValue, value);
-              slave->setReal(c->getValueRefB(),value); //sendCommand(toClient, c.toFMU, cmd, strlen(cmd));
-              break;
-            }
-          }
-        } else if (strncmp(token, fmiDoStepPending, strlen(fmiDoStepPending)) == 0) {
-           // We must start a timer here which should ask the slave about fmiGetStatus. No need to free the timer object. It is single shot timer and will automatically call the destroy after 5 seconds.
-          //FMICoSimulationTimer *FMICSTimer = createFMICoSimulationTimer(client, FMICSServer);
-          //Todo: need to fix
-        } else if (strncmp(token, fmiDoStepError, strlen(fmiDoStepError)) == 0) {
-          //logPrint(stderr,"doStep() of FMU didn't return fmiOK! Exiting...\n");fflush(NULL);
-          exit(EXIT_FAILURE);
-        } else if (strncmp(token, fmiDoStepFinished, strlen(fmiDoStepFinished)) == 0) {
-          slave->setState(SLAVE_STEPPINGFINISHED);
-          switch (m_method) {
-          case PARALLEL:  // parallel
-            slave->terminate(); //sendCommand(client, clientIndex, fmiTerminateSlave, strlen(fmiTerminateSlave));
-            break;
-          }
-        }
-        token = strtok(NULL, "\n");
-      }
-      free(response);
-}
-      */
 
 void Master::createStrongConnection(int slaveA, int slaveB, int connectorA, int connectorB){
     m_strongConnections.push_back(new StrongConnection(getSlave(slaveA),getSlave(slaveB),connectorA,connectorB));
@@ -468,14 +432,18 @@ void Master::onSlaveGetXML(FMIClient * slave){
 };
 
 void Master::onSlaveInstantiated(FMIClient* slave){
+    slave->m_state = FMICLIENT_STATE_DONE_INSTANTIATE_SLAVE;
+    slave->m_isInstantiated = true;
     tick();
 };
 
 void Master::onSlaveInitialized(FMIClient* slave){
+    slave->m_state = FMICLIENT_STATE_DONE_INITIALIZE_SLAVE;
     tick();
 };
 
 void Master::onSlaveTerminated(FMIClient* slave){
+    slave->m_state = FMICLIENT_STATE_DONE_TERMINATE_SLAVE;
     tick();
 };
 
@@ -484,6 +452,7 @@ void Master::onSlaveFreed(FMIClient* slave){
 };
 
 void Master::onSlaveStepped(FMIClient* slave){
+    slave->m_state = FMICLIENT_STATE_DONE_DOSTEP;
     tick();
 };
 
@@ -492,22 +461,27 @@ void Master::onSlaveGotVersion(FMIClient* slave){
 };
 
 void Master::onSlaveSetReal(FMIClient* slave){
+    slave->m_state = FMICLIENT_STATE_DONE_SET_REAL;
     tick();
 };
 
 void Master::onSlaveGotReal(FMIClient* slave){
+    slave->m_state = FMICLIENT_STATE_DONE_GET_REAL;
     tick();
 };
 
 void Master::onSlaveGotState(FMIClient* slave){
+    slave->m_state = FMICLIENT_STATE_DONE_GET_STATE;
     tick();
 };
 
 void Master::onSlaveSetState(FMIClient* slave){
+    slave->m_state = FMICLIENT_STATE_DONE_SET_STATE;
     tick();
 };
 
 void Master::onSlaveFreedState(FMIClient* slave){
+    slave->m_state = FMICLIENT_STATE_DONE_FREE_STATE;
     tick();
 };
 

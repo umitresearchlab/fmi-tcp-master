@@ -33,7 +33,7 @@ int main(int argc, char *argv[] ) {
     fmitcp::Logger logger;
     Master master(logger);
     master.setTimeStep(0.1);
-    master.setEnableEndTime(false);
+    master.setEnableEndTime(true);
     master.setWeakMethod(PARALLEL);
 
     for (j = 1; j < argc; j++) {

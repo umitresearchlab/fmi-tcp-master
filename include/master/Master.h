@@ -14,6 +14,7 @@
 namespace fmitcp_master {
 
     class FMIClient;
+    enum FMIClientState;
 
     enum WeakCouplingAlgorithm {
         SERIAL,
@@ -23,14 +24,18 @@ namespace fmitcp_master {
     enum MasterState {
         MASTER_STATE_START,
         MASTER_STATE_CONNECTING_SLAVES,
+        MASTER_STATE_START_SIMLOOP,
         MASTER_STATE_FETCHING_VERSION,
         MASTER_STATE_FETCHING_XML,
         MASTER_STATE_INSTANTIATING_SLAVES,
         MASTER_STATE_INITIALIZING_SLAVES,
         MASTER_STATE_TRANSFERRING_WEAK,
+        MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO,
         MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES,
+        MASTER_STATE_FETCHING_STATES,
         MASTER_STATE_TRANSFERRING_STRONG,
-        MASTER_STATE_STEPPING_SLAVES
+        MASTER_STATE_STEPPING_SLAVES,
+        MASTER_STATE_DONE
     };
 
     class Master {
@@ -103,16 +108,18 @@ namespace fmitcp_master {
         void createStrongConnection(int slaveA, int slaveB, int connectorA, int connectorB);
         void createWeakConnection(int slaveA, int slaveB, int valueReferenceA, int valueReferenceB);
 
-        void transferWeakConnectionData();
-
         /// Start simulation
         void simulate();
 
         void instantiateSlaves();
         void initializeSlaves();
-        void stepSlaves();
+        void stepSlaves(bool forFutureVelocities);
+        void fetchDirectionalDerivatives();
+        void transferStrongConnectionData();
+        void transferWeakConnectionData();
+        void getSlaveStates();
 
-        //bool hasAllClientsState(Slave::SlaveState state);
+        bool allClientsHaveState(FMIClientState state);
 
         /// "State machine" tick
         void tick();
