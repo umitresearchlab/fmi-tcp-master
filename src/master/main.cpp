@@ -2,6 +2,7 @@
 #include <fmitcp/Client.h>
 #include <fmitcp/common.h>
 #include <fmitcp/Logger.h>
+#include <fmitcp/EventPump.h>
 #include <stdlib.h>
 #include <signal.h>
 #include <sstream>
@@ -20,7 +21,8 @@ int main(int argc, char *argv[] ) {
     printf("FMI Master %s\n",FMITCPMASTER_VERSION);fflush(NULL);
 
     fmitcp::Logger logger;
-    Master master(logger);
+    fmitcp::EventPump pump;
+    Master master(logger,&pump);
     master.setTimeStep(0.1);
     master.setEnableEndTime(false);
     master.setWeakMethod(PARALLEL);

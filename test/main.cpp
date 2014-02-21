@@ -2,6 +2,7 @@
 #include <sstream>
 #include <stdlib.h>
 #include <fmitcp/Server.h>
+#include <fmitcp/EventPump.h>
 #include "master/Master.h"
 #include "common/common.h"
 
@@ -30,8 +31,9 @@ int main(int argc, char *argv[] ) {
     string hostName = "localhost",
         fmuPath = "";
 
+    fmitcp::EventPump pump;
     fmitcp::Logger logger;
-    Master master(logger);
+    Master master(logger,&pump);
     master.setTimeStep(0.1);
     master.setEnableEndTime(true);
     master.setWeakMethod(PARALLEL);

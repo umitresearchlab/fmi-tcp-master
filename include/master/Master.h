@@ -77,6 +77,9 @@ namespace fmitcp_master {
         MASTER_STATE_DONE
     };
 
+    /**
+     * @brief Handles all connections to slaves connected via TCP and requests them to step.
+     */
     class Master {
 
     private:
@@ -98,8 +101,8 @@ namespace fmitcp_master {
         double m_time;
 
     public:
-        Master();
-        Master(const fmitcp::Logger& logger);
+
+        Master(const fmitcp::Logger& logger, fmitcp::EventPump* pump);
         virtual ~Master();
 
         void init();
@@ -113,6 +116,7 @@ namespace fmitcp_master {
         /// Get a slave by id
         FMIClient * getSlave(int id);
 
+        /// Set the master state
         void setState(MasterState state);
 
         // These are callbacks that fire when a slave did something:
@@ -145,12 +149,19 @@ namespace fmitcp_master {
         /// Set method for weak coupling
         void setWeakMethod(WeakCouplingAlgorithm algorithm);
 
+        /**
+         * @brief Create strong connection between slaves A and B
+         * @todo Should take valuerefs instead
+         */
         void createStrongConnection(FMIClient* slaveA, FMIClient* slaveB, int connectorA, int connectorB);
+
+        /// Create weak connection between the slaves
         void createWeakConnection(FMIClient* slaveA, FMIClient* slaveB, int valueReferenceA, int valueReferenceB);
 
         /// Start simulation
         void simulate();
 
+        /// Request all slaves to instantiate
         void instantiateSlaves();
         void initializeSlaves();
         void stepSlaves(bool forFutureVelocities);
@@ -162,6 +173,7 @@ namespace fmitcp_master {
         void setSlaveStates();
         void setStrongCouplingForces();
 
+        /// Returns true if all TCP clients have the given state
         bool allClientsHaveState(FMIClientState state);
 
         /// "State machine" tick

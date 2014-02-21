@@ -12,18 +12,14 @@
 
 using namespace fmitcp_master;
 
-Master::Master(){
-    init();
-}
-
-Master::Master(const fmitcp::Logger& logger){
+Master::Master(const fmitcp::Logger& logger, fmitcp::EventPump* pump){
     m_logger = logger;
+    m_pump = pump;
     init();
 }
 
 void Master::init(){
 
-    m_pump = new fmitcp::EventPump();
 
     // Set state
     setState(MASTER_STATE_CONNECTING_SLAVES);
