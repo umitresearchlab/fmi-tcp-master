@@ -3,11 +3,16 @@ fmi-tcp-master
 Connects simulation slaves (FMUs) over TCP. Has built in support for weak and strong coupling.
 
 # Install instructions
-Prerequisities are [Lacewing](http://lacewing-project.org/), [Protobuf](https://developers.google.com/protocol-buffers), and [FMITCP](https://github.com/umitresearchlab/fmi-co-simulation).
+Prerequisities are [Lacewing](http://lacewing-project.org/), [Protobuf](https://developers.google.com/protocol-buffers), [FMITCP](https://github.com/umitresearchlab/fmi-co-simulation), and [Strong Coupling Core](https://github.com/umitresearchlab/strong-coupling-core).
 
     cd fmi-tcp-master/;
     mkdir build && cd build;
-    cmake .. -DFMITCP_INCLUDE_DIR=<FMITCP include files location> -DLACEWING_INCLUDE_DIR=<Lacewing include files location> -DFMITCP_LIBS_DIR=<FMITCP libraries location> -DLACEWING_LIBS_DIR=<Lacewing libraries location>
+    cmake .. -DFMITCP_INCLUDE_DIR=<FMITCP include files location> \
+             -DFMITCP_LIBS_DIR=<FMITCP libraries location> \
+             -DLACEWING_INCLUDE_DIR=<Lacewing include files location> \
+             -DLACEWING_LIBS_DIR=<Lacewing libraries location> \
+             -DSTRONG_COUPLING_INCLUDE_DIR=<Strong coupling core include files location> \
+             -DSTRONG_COUPLING_LIBS_DIR=<Strong coupling core libraries location>
 
 # Usage
 
