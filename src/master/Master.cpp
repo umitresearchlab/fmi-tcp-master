@@ -172,15 +172,39 @@ void Master::getSlaveStates() {
     }
 }
 
+void Master::setSlaveStates() {
+    setState(MASTER_STATE_SETTING_STATES);
+    for(int i=0; i<m_slaves.size(); i++){
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Setting state for slave %d...\n", i);
+        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_SET_STATE;
+        m_slaves[i]->fmi2_import_set_fmu_state(0,0,0);
+    }
+}
+
 void Master::stepSlaves(bool forFutureVelocities){
-    setState(MASTER_STATE_STEPPING_SLAVES);
+    if(forFutureVelocities)
+        setState(MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO);
+    else
+        setState(MASTER_STATE_STEPPING_SLAVES);
     for(int i=0; i<m_slaves.size(); i++){
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"Stepping slave %d...\n", i);
         //m_slaves[i]->fmi2_import_do_step(0, 0, m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
         m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_DOSTEP;
         m_slaves[i]->fmi2_import_do_step(0,0,m_time,m_timeStep,true);
     }
-    m_time += m_timeStep;
+    if(!forFutureVelocities)
+        m_time += m_timeStep;
+}
+
+void Master::setStrongCouplingForces(){
+    setState(MASTER_STATE_SETTING_STRONG_COUPLING_FORCES);
+
+    for(int i=0; i<m_slaves.size(); i++){
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Setting strong coupling forces for slave %d...\n", i);
+        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_SET_REAL;
+        std::vector<int> valueRefs;
+        m_slaves[i]->fmi2_import_get_real(0,0,valueRefs);
+    }
 }
 
 void Master::setState(MasterState state){
@@ -213,6 +237,7 @@ bool Master::allClientsHaveState(FMIClientState state){
 }
 
 
+// Simulation loop logic. TODO: use finite state machine library for this?
 void Master::tick(){
 
     bool allConnected, allInstantiated, allInitialized, allReady;
@@ -271,20 +296,29 @@ void Master::tick(){
 
         } else {
             // No connections at all, we can now do final step
-            stepSlaves(true);
+            stepSlaves(false);
         }
         break;
 
 
     case MASTER_STATE_GETTING_STATES:
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"GOT STATE ......\n");
         if(allClientsHaveState(FMICLIENT_STATE_DONE_GET_STATE))
-            fetchDirectionalDerivatives();
-
+            stepSlaves(true); // Step to get future velocities
         break;
 
     case MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO:
-        if(allClientsHaveState(FMICLIENT_STATE_DONE_DOSTEP))
+        if(allClientsHaveState(FMICLIENT_STATE_DONE_DOSTEP)){
+            // TODO store future velocities!
+            setSlaveStates(); // Rewind!
+        }
+        break;
+
+    case MASTER_STATE_SETTING_STATES:
+        if(allClientsHaveState(FMICLIENT_STATE_DONE_SET_STATE)){
+            // Done rewinding. Now get directional derivatives.
             fetchDirectionalDerivatives();
+        }
         break;
 
     case MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES:
@@ -292,9 +326,11 @@ void Master::tick(){
         if(!allClientsHaveState(FMICLIENT_STATE_DONE_DIRECTIONALDERIVATIVES))
             break;
 
-        // All are ready. Need to collect future velocities from them for the strong coupling algo.
-        // Get states
-        getSlaveStates();
+        // Got directional derivatives and future velocities.
+        // TODO: Run strong coupling library
+
+        // Apply strong coupling forces to slaves
+        setStrongCouplingForces();
 
         break;
 
@@ -417,3 +453,7 @@ void Master::onSlaveFreedState(FMIClient* slave){
     tick();
 };
 
+void Master::onSlaveDirectionalDerivative(FMIClient* slave){
+    slave->m_state = FMICLIENT_STATE_DONE_DIRECTIONALDERIVATIVES;
+    tick();
+};

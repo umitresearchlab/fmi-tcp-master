@@ -89,7 +89,7 @@ void FMIClient::on_fmi2_import_get_real_res(int mid, const vector<double>& value
     m_master->onSlaveGotReal(this);
 };
 
-void FMIClient::on_fmi2_import_get_fmu_state_res(int mid, int stateId){
+void FMIClient::on_fmi2_import_get_fmu_state_res(int mid, int stateId, fmitcp_proto::fmi2_status_t status){
     m_master->onSlaveGotState(this);
 };
 
@@ -100,6 +100,10 @@ void FMIClient::on_fmi2_import_set_fmu_state_res(int mid, fmitcp_proto::fmi2_sta
 void FMIClient::on_fmi2_import_free_fmu_state_res(int mid, fmitcp_proto::fmi2_status_t status){
     m_master->onSlaveFreedState(this);
 };
+
+void FMIClient::on_fmi2_import_get_directional_derivative_res(int mid, const vector<double>& dz, fmitcp_proto::fmi2_status_t status){
+    m_master->onSlaveDirectionalDerivative(this);
+}
 
 // TODO:
 

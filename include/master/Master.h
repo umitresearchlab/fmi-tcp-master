@@ -114,21 +114,22 @@ namespace fmitcp_master {
         void setState(MasterState state);
 
         // These are callbacks that fire when a slave did something:
-        void slaveConnected(FMIClient * slave);
-        void slaveDisconnected(FMIClient * slave);
-        void slaveError(FMIClient * slave);
-        void onSlaveGetXML(FMIClient * slave);
-        void onSlaveInstantiated(FMIClient* slave);
-        void onSlaveInitialized(FMIClient* slave);
-        void onSlaveTerminated(FMIClient* slave);
-        void onSlaveFreed(FMIClient* slave);
-        void onSlaveStepped(FMIClient* slave);
-        void onSlaveGotVersion(FMIClient* slave);
-        void onSlaveSetReal(FMIClient* slave);
-        void onSlaveGotReal(FMIClient* slave);
-        void onSlaveGotState(FMIClient* slave);
-        void onSlaveSetState(FMIClient* slave);
-        void onSlaveFreedState(FMIClient* slave);
+        void slaveConnected                 (FMIClient* slave);
+        void slaveDisconnected              (FMIClient* slave);
+        void slaveError                     (FMIClient* slave);
+        void onSlaveGetXML                  (FMIClient* slave);
+        void onSlaveInstantiated            (FMIClient* slave);
+        void onSlaveInitialized             (FMIClient* slave);
+        void onSlaveTerminated              (FMIClient* slave);
+        void onSlaveFreed                   (FMIClient* slave);
+        void onSlaveStepped                 (FMIClient* slave);
+        void onSlaveGotVersion              (FMIClient* slave);
+        void onSlaveSetReal                 (FMIClient* slave);
+        void onSlaveGotReal                 (FMIClient* slave);
+        void onSlaveGotState                (FMIClient* slave);
+        void onSlaveSetState                (FMIClient* slave);
+        void onSlaveFreedState              (FMIClient* slave);
+        void onSlaveDirectionalDerivative   (FMIClient* slave);
 
         /// Set communication timestep
         void setTimeStep(double timeStep);
@@ -155,6 +156,8 @@ namespace fmitcp_master {
         void transferStrongConnectionData();
         void transferWeakConnectionData();
         void getSlaveStates();
+        void setSlaveStates();
+        void setStrongCouplingForces();
 
         bool allClientsHaveState(FMIClientState state);
 
