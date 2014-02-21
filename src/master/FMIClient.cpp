@@ -77,6 +77,7 @@ void FMIClient::on_fmi2_import_get_version_res(int mid, string version){
     m_master->onSlaveGotVersion(this);
 };
 
+
 void FMIClient::on_fmi2_import_set_real_res(int mid, fmitcp_proto::fmi2_status_t status){
     m_master->onSlaveSetReal(this);
 };

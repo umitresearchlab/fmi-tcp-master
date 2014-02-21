@@ -72,6 +72,7 @@ namespace fmitcp_master {
         MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES,
         MASTER_STATE_SETTING_STRONG_COUPLING_FORCES,
         MASTER_STATE_STEPPING_SLAVES,
+        MASTER_STATE_GET_WEAK_REALS,
         MASTER_STATE_DONE
     };
 
@@ -154,7 +155,7 @@ namespace fmitcp_master {
         void stepSlaves(bool forFutureVelocities);
         void fetchDirectionalDerivatives();
         void transferStrongConnectionData();
-        void transferWeakConnectionData();
+        void getWeakConnectionReals();
         void getSlaveStates();
         void setSlaveStates();
         void setStrongCouplingForces();

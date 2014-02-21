@@ -60,16 +60,6 @@ fmitcp::Logger * Master::getLogger(){
     return &m_logger;
 };
 
-void Master::transferWeakConnectionData(){
-    m_state = MASTER_STATE_TRANSFERRING_WEAK;
-
-    // Assume parallel
-    for (int i = 0; i < m_weakConnections.size(); ++i){
-
-        // Start to transfer value
-        m_weakConnections[i];
-    }
-}
 
 FMIClient* Master::connectSlave(std::string uri){
     struct parsed_url * url = parse_url(uri.c_str());
@@ -203,6 +193,18 @@ void Master::setStrongCouplingForces(){
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"Setting strong coupling forces for slave %d...\n", i);
         m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_SET_REAL;
         std::vector<int> valueRefs;
+        std::vector<double> values;
+        m_slaves[i]->fmi2_import_set_real(0,0,valueRefs,values);
+    }
+}
+
+void Master::getWeakConnectionReals(){
+    setState(MASTER_STATE_GET_WEAK_REALS);
+
+    for(int i=0; i<m_slaves.size(); i++){
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting weak coupling reals for slave %d...\n", i);
+        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_GET_REAL;
+        std::vector<int> valueRefs;
         m_slaves[i]->fmi2_import_get_real(0,0,valueRefs);
     }
 }
@@ -221,6 +223,8 @@ void Master::setState(MasterState state){
     case MASTER_STATE_SETTING_STRONG_COUPLING_FORCES:   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_SETTING_STRONG_COUPLING_FORCES\n");    break;
     case MASTER_STATE_STEPPING_SLAVES:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_STEPPING_SLAVES\n");                   break;
     case MASTER_STATE_DONE:                             m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_DONE\n");                              break;
+    case MASTER_STATE_GET_WEAK_REALS:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GET_WEAK_REALS\n");                    break;
+
     default:
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"State not recognized: %d\n",m_state);
         break;
@@ -292,7 +296,7 @@ void Master::tick(){
             getSlaveStates();
 
         } else if(m_weakConnections.size()){
-            transferWeakConnectionData();
+            getWeakConnectionReals();
 
         } else {
             // No connections at all, we can now do final step
@@ -340,7 +344,10 @@ void Master::tick(){
             break;
 
         // All strong coupling forces are set. Now transfer weak.
-        transferWeakConnectionData();
+        if(m_weakConnections.size() > 0)
+            getWeakConnectionReals();
+        else
+            stepSlaves(false); // Jump to final step
 
         break;
 
