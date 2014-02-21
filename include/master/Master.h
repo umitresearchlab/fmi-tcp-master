@@ -21,19 +21,56 @@ namespace fmitcp_master {
         PARALLEL
     };
 
+
+
+    /*
+
+    === The simulation loop ===
+
+    Start everything up:
+    1. instantiate
+    2. initialize
+
+    Simulation loop runs until we reach end time:
+    3. simulation loop
+
+        3.1 If there are strong coupling connections:
+
+            We need velocities one step ahead for the strong coupling:
+            3.1.1 getState
+            3.1.2 doStep
+            3.1.3 getReal       (get only velocities)
+            3.1.4 setState      (rewind)
+
+            And also directional derivatives:
+            3.1.5 getDirecionalDerivatives
+
+            The resulting strong coupling constraint forces are applied:
+            3.1.6 setReal       (strong coupling forces)
+
+        We transfer values from weak coupling:
+        3.2 setReal
+
+        Final step.
+        3.3 doStep
+
+     */
+
     enum MasterState {
         MASTER_STATE_START,
         MASTER_STATE_CONNECTING_SLAVES,
         MASTER_STATE_START_SIMLOOP,
-        MASTER_STATE_FETCHING_VERSION,
-        MASTER_STATE_FETCHING_XML,
+        MASTER_STATE_GETTING_VERSION,
+        MASTER_STATE_GETTING_XML,
         MASTER_STATE_INSTANTIATING_SLAVES,
         MASTER_STATE_INITIALIZING_SLAVES,
         MASTER_STATE_TRANSFERRING_WEAK,
+        MASTER_STATE_GETTING_STATES,
         MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO,
-        MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES,
-        MASTER_STATE_FETCHING_STATES,
-        MASTER_STATE_TRANSFERRING_STRONG,
+        MASTER_STATE_GETTING_FUTURE_VELO,
+        MASTER_STATE_SETTING_STATES,
+        MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES,
+        MASTER_STATE_SETTING_STRONG_COUPLING_FORCES,
         MASTER_STATE_STEPPING_SLAVES,
         MASTER_STATE_DONE
     };

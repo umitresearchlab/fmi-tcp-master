@@ -60,33 +60,6 @@ fmitcp::Logger * Master::getLogger(){
     return &m_logger;
 };
 
-/*
-void Master_clientOnConnect(lw_client client) {
-    Master * master = (Master*)lw_stream_tag(client);
-    master->clientConnected(client);
-}
-
-void Master_clientOnData(lw_client client, const char* data, long size) {
-    Master * master = (Master*)lw_stream_tag(client);
-    master->clientData(client,data,size);
-}
-
-void Master_clientOnDisconnect(lw_client client) {
-    Master * master = (Master*)lw_stream_tag(client);
-    master->clientDisconnected(client);
-}
-
-void Master_clientOnError(lw_client client, lw_error error) {
-    const char* errorString = lw_error_tostring(error);
-    lw_pump pump = lw_stream_pump(client);
-
-    if (strcmp(errorString, "Error connecting") == 0) {
-        lw_addr address = lw_client_server_addr(client);
-    }
-
-    lw_stream_delete(client);
-}*/
-
 void Master::transferWeakConnectionData(){
     m_state = MASTER_STATE_TRANSFERRING_WEAK;
 
@@ -178,7 +151,7 @@ void Master::initializeSlaves() {
 
 void Master::fetchDirectionalDerivatives() {
     // TODO: This call needs seeds from the strong coupling library, but that is not available yet!
-    setState(MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES);
+    setState(MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES);
     for(int i=0; i<m_slaves.size(); i++){
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting directional derivatives from slave %d...\n", i);
         m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_DIRECTIONALDERIVATIVES;
@@ -191,7 +164,7 @@ void Master::fetchDirectionalDerivatives() {
 }
 
 void Master::getSlaveStates() {
-    setState(MASTER_STATE_FETCHING_STATES);
+    setState(MASTER_STATE_GETTING_STATES);
     for(int i=0; i<m_slaves.size(); i++){
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting state from slave %d...\n", i);
         m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_GET_STATE;
@@ -215,14 +188,18 @@ void Master::setState(MasterState state){
 
     switch(m_state){
     case MASTER_STATE_CONNECTING_SLAVES:                m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_CONNECTING_SLAVES\n");                 break;
-    case MASTER_STATE_FETCHING_VERSION:                 m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_FETCHING_VERSION\n");                  break;
-    case MASTER_STATE_FETCHING_XML:                     m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_FETCHING_XML\n");                      break;
+    case MASTER_STATE_GETTING_VERSION:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_VERSION\n");                   break;
+    case MASTER_STATE_GETTING_XML:                      m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_XML\n");                       break;
     case MASTER_STATE_INSTANTIATING_SLAVES:             m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_INSTANTIATING_SLAVES\n");              break;
     case MASTER_STATE_INITIALIZING_SLAVES:              m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_INITIALIZING_SLAVES\n");               break;
     case MASTER_STATE_TRANSFERRING_WEAK:                m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_TRANSFERRING_WEAK\n");                 break;
-    case MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES: m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES\n");  break;
-    case MASTER_STATE_TRANSFERRING_STRONG:              m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_TRANSFERRING_STRONG\n");               break;
+    case MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES:  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES\n");   break;
+    case MASTER_STATE_SETTING_STRONG_COUPLING_FORCES:   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_SETTING_STRONG_COUPLING_FORCES\n");    break;
     case MASTER_STATE_STEPPING_SLAVES:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_STEPPING_SLAVES\n");                   break;
+    case MASTER_STATE_DONE:                             m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_DONE\n");                              break;
+    default:
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"State not recognized: %d\n",m_state);
+        break;
     }
 
 }
@@ -237,37 +214,6 @@ bool Master::allClientsHaveState(FMIClientState state){
 
 
 void Master::tick(){
-
-    /*
-
-    === The simulation loop ===
-
-    Start everything up:
-    1. instantiate
-    2. initialize
-
-    Simulation loop runs until we reach end time:
-    3. simulation loop
-
-        We need velocities one step ahead for the strong coupling:
-        3.1 getState
-        3.2 doStep
-        3.3 getReal       (get only velocities)
-        3.4 setState      (rewind)
-
-        And also directional derivatives:
-        3.5 getDirecionalDerivatives
-
-        The resulting strong coupling constraint forces are applied:
-        3.6 setReal       (strong coupling forces)
-
-        We transfer values from weak coupling:
-        3.7 setReal
-
-        Final step.
-        3.8 doStep
-
-     */
 
     bool allConnected, allInstantiated, allInitialized, allReady;
 
@@ -291,10 +237,10 @@ void Master::tick(){
         instantiateSlaves();
         break;
 
-    case MASTER_STATE_FETCHING_VERSION:
+    case MASTER_STATE_GETTING_VERSION:
         break;
 
-    case MASTER_STATE_FETCHING_XML:
+    case MASTER_STATE_GETTING_XML:
         break;
 
     case MASTER_STATE_INSTANTIATING_SLAVES:
@@ -330,7 +276,7 @@ void Master::tick(){
         break;
 
 
-    case MASTER_STATE_FETCHING_STATES:
+    case MASTER_STATE_GETTING_STATES:
         if(allClientsHaveState(FMICLIENT_STATE_DONE_GET_STATE))
             fetchDirectionalDerivatives();
 
@@ -341,7 +287,7 @@ void Master::tick(){
             fetchDirectionalDerivatives();
         break;
 
-    case MASTER_STATE_FETCHING_DIRECTIONAL_DERIVATIVES:
+    case MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES:
         // All ready?
         if(!allClientsHaveState(FMICLIENT_STATE_DONE_DIRECTIONALDERIVATIVES))
             break;
@@ -352,25 +298,21 @@ void Master::tick(){
 
         break;
 
-    case MASTER_STATE_TRANSFERRING_WEAK:
-        stepSlaves(false);
+    case MASTER_STATE_SETTING_STRONG_COUPLING_FORCES:
+        // Check if all strong coupling forces are applied
+        if(!allClientsHaveState(FMICLIENT_STATE_DONE_SET_REAL))
+            break;
+
+        // All strong coupling forces are set. Now transfer weak.
+        transferWeakConnectionData();
+
         break;
 
+    case MASTER_STATE_TRANSFERRING_WEAK:
+        if(!allClientsHaveState(FMICLIENT_STATE_DONE_SET_REAL))
+            break;
 
-    case MASTER_STATE_TRANSFERRING_STRONG:
-        // Check if all strong coupling forces are applied
-        /*
-        bool allReady = true;
-        for(int i=0; i<m_strongConnections.size(); i++){
-            if(!m_strongConnections[i]->ready()){
-                allReady = false;
-                break;
-            }
-        }
-        if(allReady){
-
-        }
-        */
+        stepSlaves(false);
         break;
 
     case MASTER_STATE_STEPPING_SLAVES:
@@ -416,16 +358,6 @@ void Master::setEndTime(double endTime){
 void Master::setWeakMethod(WeakCouplingAlgorithm algorithm){
     m_method = algorithm;
 }
-
-/*
-bool Master::hasAllClientsState(Slave::SlaveState state){
-    for(int i=0; i<m_slaves.size(); i++){
-        if(m_slaves[i]->getState() != state)
-            return false;
-    }
-    return true;
-}
-*/
 
 void Master::onSlaveGetXML(FMIClient * slave){
     tick();

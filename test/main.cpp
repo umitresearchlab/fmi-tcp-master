@@ -104,19 +104,27 @@ int main(int argc, char *argv[] ) {
     }
 
     // Create a slave
-    fmitcp::Server server(fmuPath, debugLogging, log_level, master.getEventPump());
-    if (!server.isFmuParsed())
-      return EXIT_FAILURE;
-    server.getLogger()->setPrefix("Slave: ");
-    server.host(hostName,port);
+    fmitcp::Server serverA(fmuPath, debugLogging, log_level, master.getEventPump());
+    fmitcp::Server serverB(fmuPath, debugLogging, log_level, master.getEventPump());
+    if (!serverA.isFmuParsed() || !serverB.isFmuParsed())
+        return EXIT_FAILURE;
+    serverA.getLogger()->setPrefix("slaveA: ");
+    serverB.getLogger()->setPrefix("SlaveB: ");
+    serverA.host(hostName,port);
+    serverB.host(hostName,port+1);
 
     master.getLogger()->setPrefix("Master:   ");
 
+    // Create ports
+    ostringstream portStringStream1; portStringStream1 << port;
+    ostringstream portStringStream2; portStringStream2 << (port+1);
+
     // Connect
-    ostringstream portStringStream;
-    portStringStream << port;
-    FMIClient* slave = master.connectSlave("tcp://"+hostName+":"+portStringStream.str());
-    slave->getLogger()->setPrefix("Master "+int_to_string(slave->getId())+": ");
+    FMIClient* slaveA = master.connectSlave("tcp://"+hostName+":"+portStringStream1.str());
+    FMIClient* slaveB = master.connectSlave("tcp://"+hostName+":"+portStringStream2.str());
+
+    slaveA->getLogger()->setPrefix("Master "+int_to_string(slaveA->getId())+": ");
+    slaveB->getLogger()->setPrefix("Master "+int_to_string(slaveB->getId())+": ");
 
     // Set connections
     //master.createStrongConnection(strong_slaveA[i], strong_slaveB[i], strong_connA[i], strong_connB[i]);
