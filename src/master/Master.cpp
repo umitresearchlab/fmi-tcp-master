@@ -335,12 +335,12 @@ void Master::tick(){
     }
 }
 
-void Master::createStrongConnection(int slaveA, int slaveB, int connectorA, int connectorB){
-    m_strongConnections.push_back(new StrongConnection(getSlave(slaveA),getSlave(slaveB),connectorA,connectorB));
+void Master::createStrongConnection(FMIClient* slaveA, FMIClient* slaveB, int connectorA, int connectorB){
+    m_strongConnections.push_back(new StrongConnection(slaveA,slaveB,connectorA,connectorB));
 }
 
-void Master::createWeakConnection(int slaveA, int slaveB, int valueReferenceA, int valueReferenceB){
-    m_weakConnections.push_back(new WeakConnection(getSlave(slaveA),getSlave(slaveB),valueReferenceA,valueReferenceB));
+void Master::createWeakConnection(FMIClient* slaveA, FMIClient* slaveB, int valueReferenceA, int valueReferenceB){
+    m_weakConnections.push_back(new WeakConnection(slaveA,slaveB,valueReferenceA,valueReferenceB));
 }
 
 void Master::setTimeStep(double timeStep){

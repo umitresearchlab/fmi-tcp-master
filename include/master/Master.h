@@ -98,7 +98,7 @@ namespace fmitcp_master {
     public:
         Master();
         Master(const fmitcp::Logger& logger);
-        ~Master();
+        virtual ~Master();
 
         void init();
 
@@ -142,8 +142,8 @@ namespace fmitcp_master {
         /// Set method for weak coupling
         void setWeakMethod(WeakCouplingAlgorithm algorithm);
 
-        void createStrongConnection(int slaveA, int slaveB, int connectorA, int connectorB);
-        void createWeakConnection(int slaveA, int slaveB, int valueReferenceA, int valueReferenceB);
+        void createStrongConnection(FMIClient* slaveA, FMIClient* slaveB, int connectorA, int connectorB);
+        void createWeakConnection(FMIClient* slaveA, FMIClient* slaveB, int valueReferenceA, int valueReferenceB);
 
         /// Start simulation
         void simulate();

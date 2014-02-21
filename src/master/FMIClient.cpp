@@ -18,7 +18,6 @@ FMIClient::~FMIClient(){
 };
 
 void FMIClient::onConnect(){
-    //fmi2_import_do_step(0,0,0.0,0.1,true);
     m_master->slaveConnected(this);
 };
 
@@ -83,6 +82,10 @@ void FMIClient::on_fmi2_import_set_real_res(int mid, fmitcp_proto::fmi2_status_t
 };
 
 void FMIClient::on_fmi2_import_get_real_res(int mid, const vector<double>& values, fmitcp_proto::fmi2_status_t status){
+    // Store result
+    m_getRealResult = values;
+
+    // Notify master
     m_master->onSlaveGotReal(this);
 };
 
@@ -97,6 +100,8 @@ void FMIClient::on_fmi2_import_set_fmu_state_res(int mid, fmitcp_proto::fmi2_sta
 void FMIClient::on_fmi2_import_free_fmu_state_res(int mid, fmitcp_proto::fmi2_status_t status){
     m_master->onSlaveFreedState(this);
 };
+
+// TODO:
 
 /*
 //void on_fmi2_import_reset_slave_res                     (int mid, fmitcp_proto::fmi2_status_t status);

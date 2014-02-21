@@ -126,8 +126,8 @@ int main(int argc, char *argv[] ) {
     slaveA->getLogger()->setPrefix("Master "+int_to_string(slaveA->getId())+": ");
     slaveB->getLogger()->setPrefix("Master "+int_to_string(slaveB->getId())+": ");
 
-    // Set connections
-    //master.createStrongConnection(strong_slaveA[i], strong_slaveB[i], strong_connA[i], strong_connB[i]);
+    // Test strong connections
+    master.createStrongConnection(slaveA, slaveB, 0, 0);
 
     master.simulate();
 

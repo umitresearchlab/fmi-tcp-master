@@ -45,6 +45,9 @@ namespace fmitcp_master {
         FMIClientState m_state;
         bool m_isInstantiated;
 
+        /// Last fetched result from getReal
+        std::vector<double> m_getRealResult;
+
         FMIClient(Master* master, fmitcp::EventPump* pump);
         virtual ~FMIClient();
 
