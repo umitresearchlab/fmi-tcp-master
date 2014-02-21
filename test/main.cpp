@@ -128,6 +128,7 @@ int main(int argc, char *argv[] ) {
 
     // Test strong connections
     master.createStrongConnection(slaveA, slaveB, 0, 0);
+    master.createWeakConnection(slaveA, slaveB, 0, 0);
 
     master.simulate();
 

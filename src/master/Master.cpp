@@ -209,6 +209,18 @@ void Master::getWeakConnectionReals(){
     }
 }
 
+void Master::setWeakConnectionReals(){
+    setState(MASTER_STATE_SET_WEAK_REALS);
+
+    for(int i=0; i<m_slaves.size(); i++){
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Setting weak coupling reals for slave %d...\n", i);
+        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_SET_REAL;
+        std::vector<int> valueRefs;
+        std::vector<double> values;
+        m_slaves[i]->fmi2_import_set_real(0,0,valueRefs,values);
+    }
+}
+
 void Master::setState(MasterState state){
     m_state = state;
 
@@ -306,7 +318,6 @@ void Master::tick(){
 
 
     case MASTER_STATE_GETTING_STATES:
-        m_logger.log(fmitcp::Logger::LOG_DEBUG,"GOT STATE ......\n");
         if(allClientsHaveState(FMICLIENT_STATE_DONE_GET_STATE))
             stepSlaves(true); // Step to get future velocities
         break;
@@ -351,11 +362,20 @@ void Master::tick(){
 
         break;
 
-    case MASTER_STATE_TRANSFERRING_WEAK:
+    case MASTER_STATE_GET_WEAK_REALS:
+        if(!allClientsHaveState(FMICLIENT_STATE_DONE_GET_REAL))
+            break;
+
+        setWeakConnectionReals();
+        break;
+
+    case MASTER_STATE_SET_WEAK_REALS:
         if(!allClientsHaveState(FMICLIENT_STATE_DONE_SET_REAL))
             break;
 
+        // Done with eveything. step!
         stepSlaves(false);
+
         break;
 
     case MASTER_STATE_STEPPING_SLAVES:
