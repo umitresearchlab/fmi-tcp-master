@@ -172,7 +172,7 @@ void Master::initializeSlaves() {
     for(int i=0; i<m_slaves.size(); i++){
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"Initializing slave %d...\n", i);
         m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_INITIALIZE_SLAVE;
-        m_slaves[i]->fmi2_import_initialize_slave(0, 0, m_relativeTolerance, m_startTime, m_endTimeDefined, m_endTime);
+        m_slaves[i]->fmi2_import_initialize_slave(0);
     }
 }
 
