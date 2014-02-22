@@ -71,6 +71,7 @@ IF(WIN32)
         crypt32
         secur32
         mpr
+        sc m umfpack amd cblas suitesparseconfig # For strong coupling
         ${Boost_FILESYSTEM_LIBRARY}
         ${Boost_SYSTEM_LIBRARY}
         protobuf
