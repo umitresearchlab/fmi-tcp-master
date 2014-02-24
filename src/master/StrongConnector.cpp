@@ -63,10 +63,8 @@ bool StrongConnector::hasTorque(){ return m_hasTorque; };
 
 std::vector<int> StrongConnector::getForceValueRefs() const {
     std::vector<int> result;
-    if(m_hasForce){
-        for(int i=0; i<3; i++)
-            result.push_back(m_vref_force[i]);
-    }
+    for(int i=0; m_hasForce && i<3; i++)
+        result.push_back(m_vref_force[i]);
     return result;
 };
 
@@ -79,6 +77,33 @@ std::vector<int> StrongConnector::getVelocityValueRefs() const {
     return result;
 };
 
+std::vector<int> StrongConnector::getPositionValueRefs() const {
+    std::vector<int> result;
+    for(int i=0; m_hasPosition && i<3; i++)
+        result.push_back(m_vref_position[i]);
+    return result;
+};
+
+std::vector<int> StrongConnector::getQuaternionValueRefs() const {
+    std::vector<int> result;
+    for(int i=0; m_hasQuaternion && i<4; i++)
+        result.push_back(m_vref_quaternion[i]);
+    return result;
+};
+
+std::vector<int> StrongConnector::getAngularVelocityValueRefs() const {
+    std::vector<int> result;
+    for(int i=0; m_hasAngularVelocity && i<3; i++)
+        result.push_back(m_vref_angularVelocity[i]);
+    return result;
+};
+
+std::vector<int> StrongConnector::getTorqueValueRefs() const {
+    std::vector<int> result;
+    for(int i=0; m_hasTorque && i<3; i++)
+        result.push_back(m_vref_torque[i]);
+    return result;
+};
 
 sc::Connector * StrongConnector::getConnector(){
     return &m_conn;

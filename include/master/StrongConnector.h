@@ -54,8 +54,12 @@ namespace fmitcp_master {
         bool hasForce();
         bool hasTorque();
 
-        std::vector<int> getForceValueRefs() const;
+        std::vector<int> getPositionValueRefs() const;
+        std::vector<int> getQuaternionValueRefs() const;
         std::vector<int> getVelocityValueRefs() const;
+        std::vector<int> getAngularVelocityValueRefs() const;
+        std::vector<int> getForceValueRefs() const;
+        std::vector<int> getTorqueValueRefs() const;
     };
 };
 

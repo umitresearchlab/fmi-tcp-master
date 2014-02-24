@@ -161,6 +161,53 @@ void Master::initializeSlaves() {
     }
 }
 
+void Master::getStrongCouplingReals(){
+    setState(MASTER_STATE_GET_STRONG_REALS);
+
+    for(int i=0; i<m_slaves.size(); i++){
+        FMIClient * s = m_slaves[i];
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting strong coupling reals for slave %d...\n", i);
+        s->m_state = FMICLIENT_STATE_WAITING_GET_REAL;
+
+        // Get valuerefs of the values we need.
+        std::vector<int> valueRefs;
+        for(int j=0; j<s->getNumConnectors(); j++){
+            StrongConnector* c = s->getConnector(j);
+
+            // Do we need position?
+            if(c->hasPosition()){
+                std::vector<int> refs = c->getPositionValueRefs();
+                for(int k=0; k<refs.size(); k++)
+                    valueRefs.push_back(refs[k]);
+            }
+
+            // Do we need quaternion?
+            if(c->hasQuaternion()){
+                std::vector<int> refs = c->getQuaternionValueRefs();
+                for(int k=0; k<refs.size(); k++)
+                    valueRefs.push_back(refs[k]);
+            }
+
+            // Do we need velocity?
+            if(c->hasVelocity()){
+                std::vector<int> refs = c->getVelocityValueRefs();
+                for(int k=0; k<refs.size(); k++)
+                    valueRefs.push_back(refs[k]);
+            }
+
+            // Do we need angular velocity?
+            if(c->hasAngularVelocity()){
+                std::vector<int> refs = c->getAngularVelocityValueRefs();
+                for(int k=0; k<refs.size(); k++)
+                    valueRefs.push_back(refs[k]);
+            }
+        }
+
+        // Send request
+        s->fmi2_import_get_real(0,0,valueRefs);
+    }
+}
+
 void Master::fetchDirectionalDerivatives() {
     // TODO: This call needs seeds from the strong coupling library, but that is not available yet!
     setState(MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES);
@@ -383,8 +430,18 @@ void Master::tick(){
     case MASTER_STATE_SETTING_STATES:
         if(allClientsHaveState(FMICLIENT_STATE_DONE_SET_STATE)){
             // Done rewinding. Now get directional derivatives.
-            fetchDirectionalDerivatives();
+            getStrongCouplingReals();
         }
+        break;
+
+    case MASTER_STATE_GET_STRONG_REALS:
+        // All ready?
+        if(!allClientsHaveState(FMICLIENT_STATE_DONE_GET_REAL))
+            break;
+
+        // Get directional derivatives
+        fetchDirectionalDerivatives();
+
         break;
 
     case MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES:

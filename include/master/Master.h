@@ -42,10 +42,11 @@ namespace fmitcp_master {
             3.1.4 setState      (rewind)
 
             And also directional derivatives:
-            3.1.5 getDirecionalDerivatives
+            3.1.5 getStrongCouplingReals
+            3.1.6 getDirecionalDerivatives
 
             The resulting strong coupling constraint forces are applied:
-            3.1.6 setReal       (strong coupling forces)
+            3.1.7 setReal       (strong coupling forces)
 
         We transfer values from weak coupling:
         3.2 setReal
@@ -73,6 +74,7 @@ namespace fmitcp_master {
         MASTER_STATE_STEPPING_SLAVES,
         MASTER_STATE_GET_WEAK_REALS,
         MASTER_STATE_SET_WEAK_REALS,
+        MASTER_STATE_GET_STRONG_REALS,
         MASTER_STATE_DONE
     };
 
@@ -171,6 +173,7 @@ namespace fmitcp_master {
         void getSlaveStates();
         void setSlaveStates();
         void setStrongCouplingForces();
+        void getStrongCouplingReals();
 
         /// Returns true if all TCP clients have the given state
         bool allClientsHaveState(FMIClientState state);
