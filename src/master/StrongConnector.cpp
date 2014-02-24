@@ -4,7 +4,7 @@
 using namespace fmitcp_master;
 
 StrongConnector::StrongConnector(FMIClient* slave){
-
+    m_conn.m_userData = (void*)slave;
 }
 
 StrongConnector::~StrongConnector(){

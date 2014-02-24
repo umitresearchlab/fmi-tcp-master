@@ -49,6 +49,9 @@ namespace fmitcp_master {
         FMIClientState m_state;
         bool m_isInstantiated;
 
+        /// How many more directional derivatives to wait for
+        int m_numDirectionalDerivativesLeft;
+
         /// Last fetched result from getReal
         std::vector<double> m_getRealValues;
 

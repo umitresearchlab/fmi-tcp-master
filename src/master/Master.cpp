@@ -181,6 +181,54 @@ void Master::fetchDirectionalDerivatives() {
     // TODO: This call needs seeds from the strong coupling library, but that is not available yet!
     setState(MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES);
 
+    std::vector<sc::Equation*> eqs;
+    m_strongCouplingSolver.getEquations(&eqs);
+
+    std::vector<int> v_ref;
+    std::vector<int> z_ref;
+    std::vector<double> dv;
+
+    // Get jacobian information
+    for (int j = 0; j < eqs.size(); ++j){
+        sc::Equation * eq = eqs[j];
+
+
+        FMIClient * slaveA = (FMIClient *)eq->getConnA()->m_userData;
+        FMIClient * slaveB = (FMIClient *)eq->getConnB()->m_userData;
+
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Equation %d, slaves %d and %d\n",j,slaveA->getId(),slaveB->getId());
+
+        slaveA->m_state = slaveB->m_state = FMICLIENT_STATE_WAITING_DIRECTIONALDERIVATIVES;
+
+        sc::Vec3 spatSeed, rotSeed;
+
+        // Set jacobians
+        eq->getSpatialJacobianSeedA(spatSeed);
+        eq->getRotationalJacobianSeedA(rotSeed);
+        slaveA->fmi2_import_get_directional_derivative(0, 0, v_ref, z_ref, dv);
+        slaveA->m_numDirectionalDerivativesLeft++;
+        //slaveA->getDirectionalDerivative(ddSpatial,ddRotational,slaveA->m_position,spatSeed,rotSeed, dt);
+        //printf("Eq %d:\n", j);
+        //printf("A = (%f %f %f)\n", ddSpatial[0], ddSpatial[1], ddSpatial[2]);
+        //eq->setSpatialJacobianA(ddSpatial);
+        //eq->setRotationalJacobianA(ddRotational);
+
+        ////printf("A = (%f %f %f)\n", ddRotational[0], ddRotational[1], ddRotational[2]);
+
+        eq->getSpatialJacobianSeedB(spatSeed);
+        eq->getRotationalJacobianSeedB(rotSeed);
+        slaveB->fmi2_import_get_directional_derivative(0, 0, v_ref, z_ref, dv);
+        slaveB->m_numDirectionalDerivativesLeft++;
+        //slaveB->getDirectionalDerivative(ddSpatial,ddRotational,slaveB->m_position,spatSeed,rotSeed, dt);
+        //printf("B: dd=(%f %f %f), seed=(%f %f %f)\n", ddSpatial[0], ddSpatial[1], ddSpatial[2], spatSeed[0], spatSeed[1], spatSeed[2]);
+        //eq->setSpatialJacobianB(ddSpatial);
+        //eq->setRotationalJacobianB(ddRotational);
+
+        //printf("t=%f wA=(%g %g %g)\n",t,bodyA->m_torque[0],bodyA->m_torque[1],bodyA->m_torque[2]);
+        //printf("t=%f wB=(%g %g %g)\n",t,bodyB->m_torque[0],bodyB->m_torque[1],bodyB->m_torque[2]);
+    }
+
+    /*
     for(int i=0; i<m_slaves.size(); i++){
 
         std::vector<int> v_ref;
@@ -212,6 +260,7 @@ void Master::fetchDirectionalDerivatives() {
         // TODO fill these with seeds
         m_slaves[i]->fmi2_import_get_directional_derivative(0, 0, v_ref, z_ref, dv);
     }
+    */
 }
 
 void Master::getSlaveStates() {
@@ -597,6 +646,12 @@ void Master::onSlaveFreedState(FMIClient* slave){
 };
 
 void Master::onSlaveDirectionalDerivative(FMIClient* slave){
-    slave->m_state = FMICLIENT_STATE_DONE_DIRECTIONALDERIVATIVES;
+    slave->m_numDirectionalDerivativesLeft--;
+
+    m_logger.log(fmitcp::Logger::LOG_DEBUG,"Got directional derivative data from slave %d. Still %d to go...\n",slave->getId(),slave->m_numDirectionalDerivativesLeft);
+
+    if(slave->m_numDirectionalDerivativesLeft == 0)
+        slave->m_state = FMICLIENT_STATE_DONE_DIRECTIONALDERIVATIVES;
+
     tick();
 };
