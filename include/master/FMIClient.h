@@ -50,7 +50,7 @@ namespace fmitcp_master {
         bool m_isInstantiated;
 
         /// Last fetched result from getReal
-        std::vector<double> m_getRealResult;
+        std::vector<double> m_getRealValues;
 
         FMIClient(Master* master, fmitcp::EventPump* pump);
         virtual ~FMIClient();
@@ -63,6 +63,17 @@ namespace fmitcp_master {
         StrongConnector* createConnector();
         int getNumConnectors();
         StrongConnector* getConnector(int i);
+
+        /// Returns value references of positions and velocities of all connectors
+        std::vector<int> getStrongConnectorValueReferences();
+
+        /// Get seed value references, this is equivalent to forces
+        std::vector<int> getStrongSeedInputValueReferences();
+
+        /// Get "result" value references, this is velocities
+        std::vector<int> getStrongSeedOutputValueReferences();
+
+        void setConnectorValues(std::vector<int> valueRefs, std::vector<double> values);
 
         void onConnect();
         void onDisconnect();

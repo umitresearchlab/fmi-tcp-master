@@ -166,6 +166,7 @@ namespace fmitcp_master {
         void instantiateSlaves();
         void initializeSlaves();
         void stepSlaves(bool forFutureVelocities);
+        void getFutureVelocities();
         void fetchDirectionalDerivatives();
         void transferStrongConnectionData();
         void getWeakConnectionReals();

@@ -84,7 +84,7 @@ void FMIClient::on_fmi2_import_set_real_res(int mid, fmitcp_proto::fmi2_status_t
 
 void FMIClient::on_fmi2_import_get_real_res(int mid, const vector<double>& values, fmitcp_proto::fmi2_status_t status){
     // Store result
-    m_getRealResult = values;
+    m_getRealValues = values;
 
     // Notify master
     m_master->onSlaveGotReal(this);
@@ -152,4 +152,125 @@ int FMIClient::getNumConnectors(){
 
 StrongConnector* FMIClient::getConnector(int i){
     return m_strongConnectors[i];
+};
+
+
+void FMIClient::setConnectorValues(std::vector<int> valueRefs, std::vector<double> values){
+    for(int i=0; i<getNumConnectors(); i++){
+        getConnector(i)->setValues(valueRefs,values);
+    }
+};
+
+std::vector<int> FMIClient::getStrongConnectorValueReferences(){
+    std::vector<int> valueRefs;
+
+    for(int i=0; i<getNumConnectors(); i++){
+        StrongConnector* c = getConnector(i);
+
+        // Do we need position?
+        if(c->hasPosition()){
+            std::vector<int> refs = c->getPositionValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+
+        // Do we need quaternion?
+        if(c->hasQuaternion()){
+            std::vector<int> refs = c->getQuaternionValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+
+        // Do we need velocity?
+        if(c->hasVelocity()){
+            std::vector<int> refs = c->getVelocityValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+
+        // Do we need angular velocity?
+        if(c->hasAngularVelocity()){
+            std::vector<int> refs = c->getAngularVelocityValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+    }
+
+    return valueRefs;
+};
+
+std::vector<int> FMIClient::getStrongSeedInputValueReferences(){
+    std::vector<int> valueRefs;
+
+    for(int i=0; i<getNumConnectors(); i++){
+        StrongConnector* c = getConnector(i);
+
+        // Do we need position?
+        if(c->hasPosition()){
+            std::vector<int> refs = c->getPositionValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+
+        // Do we need quaternion?
+        if(c->hasQuaternion()){
+            std::vector<int> refs = c->getQuaternionValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+
+        // Do we need velocity?
+        if(c->hasVelocity()){
+            std::vector<int> refs = c->getVelocityValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+
+        // Do we need angular velocity?
+        if(c->hasAngularVelocity()){
+            std::vector<int> refs = c->getAngularVelocityValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+    }
+
+    return valueRefs;
+};
+
+std::vector<int> FMIClient::getStrongSeedOutputValueReferences(){
+    std::vector<int> valueRefs;
+
+    for(int i=0; i<getNumConnectors(); i++){
+        StrongConnector* c = getConnector(i);
+
+        // Do we need position?
+        if(c->hasPosition()){
+            std::vector<int> refs = c->getPositionValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+
+        // Do we need quaternion?
+        if(c->hasQuaternion()){
+            std::vector<int> refs = c->getQuaternionValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+
+        // Do we need velocity?
+        if(c->hasVelocity()){
+            std::vector<int> refs = c->getVelocityValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+
+        // Do we need angular velocity?
+        if(c->hasAngularVelocity()){
+            std::vector<int> refs = c->getAngularVelocityValueRefs();
+            for(int k=0; k<refs.size(); k++)
+                valueRefs.push_back(refs[k]);
+        }
+    }
+
+    return valueRefs;
 };

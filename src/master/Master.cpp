@@ -170,38 +170,7 @@ void Master::getStrongCouplingReals(){
         s->m_state = FMICLIENT_STATE_WAITING_GET_REAL;
 
         // Get valuerefs of the values we need.
-        std::vector<int> valueRefs;
-        for(int j=0; j<s->getNumConnectors(); j++){
-            StrongConnector* c = s->getConnector(j);
-
-            // Do we need position?
-            if(c->hasPosition()){
-                std::vector<int> refs = c->getPositionValueRefs();
-                for(int k=0; k<refs.size(); k++)
-                    valueRefs.push_back(refs[k]);
-            }
-
-            // Do we need quaternion?
-            if(c->hasQuaternion()){
-                std::vector<int> refs = c->getQuaternionValueRefs();
-                for(int k=0; k<refs.size(); k++)
-                    valueRefs.push_back(refs[k]);
-            }
-
-            // Do we need velocity?
-            if(c->hasVelocity()){
-                std::vector<int> refs = c->getVelocityValueRefs();
-                for(int k=0; k<refs.size(); k++)
-                    valueRefs.push_back(refs[k]);
-            }
-
-            // Do we need angular velocity?
-            if(c->hasAngularVelocity()){
-                std::vector<int> refs = c->getAngularVelocityValueRefs();
-                for(int k=0; k<refs.size(); k++)
-                    valueRefs.push_back(refs[k]);
-            }
-        }
+        std::vector<int> valueRefs = s->getStrongConnectorValueReferences();
 
         // Send request
         s->fmi2_import_get_real(0,0,valueRefs);
@@ -278,6 +247,20 @@ void Master::stepSlaves(bool forFutureVelocities){
         m_time += m_timeStep;
 }
 
+void Master::getFutureVelocities(){
+    setState(MASTER_STATE_GETTING_FUTURE_VELO);
+    for(int i=0; i<m_slaves.size(); i++){
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting future velocity from slave %d...\n", i);
+        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_GET_REAL;
+        std::vector<int> valueRefs;
+
+        // Get all connector velocity references
+        // TODO
+
+        m_slaves[i]->fmi2_import_get_real(0,0,valueRefs);
+    }
+}
+
 void Master::setStrongCouplingForces(){
     setState(MASTER_STATE_SETTING_STRONG_COUPLING_FORCES);
 
@@ -333,13 +316,13 @@ void Master::setState(MasterState state){
     case MASTER_STATE_STEPPING_SLAVES:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_STEPPING_SLAVES\n");                   break;
     case MASTER_STATE_GET_WEAK_REALS:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GET_WEAK_REALS\n");                    break;
     case MASTER_STATE_SET_WEAK_REALS:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_SET_WEAK_REALS\n");                    break;
+    case MASTER_STATE_GET_STRONG_REALS:                 m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GET_STRONG_REALS\n");                  break;
     case MASTER_STATE_DONE:                             m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_DONE\n");                              break;
 
     default:
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"State not recognized: %d\n",m_state);
         break;
     }
-
 }
 
 bool Master::allClientsHaveState(FMIClientState state){
@@ -349,7 +332,6 @@ bool Master::allClientsHaveState(FMIClientState state){
     }
     return true;
 }
-
 
 // Simulation loop logic. TODO: use finite state machine library for this?
 void Master::tick(){
@@ -422,9 +404,21 @@ void Master::tick(){
 
     case MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO:
         if(allClientsHaveState(FMICLIENT_STATE_DONE_DOSTEP)){
-            // TODO store future velocities!
-            setSlaveStates(); // Rewind!
+
+            // TODO store future velocities in the connectors!!
+            getFutureVelocities();
         }
+        break;
+
+    case MASTER_STATE_GETTING_FUTURE_VELO:
+        // All ready?
+        if(!allClientsHaveState(FMICLIENT_STATE_DONE_GET_REAL))
+            break;
+
+        // TODO: Store future velocities
+
+        setSlaveStates(); // Rewind!
+
         break;
 
     case MASTER_STATE_SETTING_STATES:
@@ -435,9 +429,13 @@ void Master::tick(){
         break;
 
     case MASTER_STATE_GET_STRONG_REALS:
+
         // All ready?
         if(!allClientsHaveState(FMICLIENT_STATE_DONE_GET_REAL))
             break;
+
+        // The following must be called whenever connector values are changed
+        m_strongCouplingSolver.updateConstraints();
 
         // Get directional derivatives
         fetchDirectionalDerivatives();
@@ -571,6 +569,12 @@ void Master::onSlaveSetReal(FMIClient* slave){
 
 void Master::onSlaveGotReal(FMIClient* slave){
     slave->m_state = FMICLIENT_STATE_DONE_GET_REAL;
+
+    if(m_state == MASTER_STATE_GET_STRONG_REALS){
+        std::vector<int> refs = slave->getStrongConnectorValueReferences(); // References
+        slave->setConnectorValues(refs,slave->m_getRealValues);
+    }
+
     tick();
 };
 

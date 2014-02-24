@@ -60,6 +60,9 @@ namespace fmitcp_master {
         std::vector<int> getAngularVelocityValueRefs() const;
         std::vector<int> getForceValueRefs() const;
         std::vector<int> getTorqueValueRefs() const;
+
+        /// Set all connector values, given value references and values
+        void setValues(std::vector<int> valueReferences, std::vector<double> values);
     };
 };
 

@@ -1,4 +1,5 @@
 #include "master/FMIClient.h"
+#include "assert.h"
 
 using namespace fmitcp_master;
 
@@ -108,3 +109,22 @@ std::vector<int> StrongConnector::getTorqueValueRefs() const {
 sc::Connector * StrongConnector::getConnector(){
     return &m_conn;
 }
+
+void StrongConnector::setValues(std::vector<int> valueReferences, std::vector<double> values){
+    assert(valueReferences.size() == values.size());
+
+    for(int i=0; i<valueReferences.size(); i++){
+        int vr = valueReferences[i];
+        double val = values[i];
+        for(int j=0; j<3; j++){
+            if(vr == m_vref_position[i])        m_conn.m_position[j] =          val;
+            if(vr == m_vref_velocity[i])        m_conn.m_velocity[j] =          val;
+            if(vr == m_vref_angularVelocity[i]) m_conn.m_angularVelocity[j] =   val;
+            if(vr == m_vref_force[i])           m_conn.m_force[j] =             val;
+            if(vr == m_vref_torque[i])          m_conn.m_torque[j] =            val;
+        }
+        for(int j=0; j<4; j++){
+            if(vr == m_vref_quaternion[i])      m_conn.m_quaternion[j] =        val;
+        }
+    }
+};
