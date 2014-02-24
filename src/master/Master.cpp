@@ -174,13 +174,36 @@ void Master::initializeSlaves() {
 void Master::fetchDirectionalDerivatives() {
     // TODO: This call needs seeds from the strong coupling library, but that is not available yet!
     setState(MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES);
+
     for(int i=0; i<m_slaves.size(); i++){
-        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting directional derivatives from slave %d...\n", i);
-        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_DIRECTIONALDERIVATIVES;
-        // TODO fill these with seeds
+
         std::vector<int> v_ref;
         std::vector<int> z_ref;
         std::vector<double> dv;
+
+        // Loop over all strong connectors
+        for(int j=0; j<m_slaves[i]->getNumConnectors(); j++){
+
+            // v_ref <=> force
+            std::vector<int> forceRefs = m_slaves[i]->getConnector(i)->getForceValueRefs();
+
+            // z_ref <=> velocity
+            std::vector<int> veloRefs = m_slaves[i]->getConnector(i)->getVelocityValueRefs();
+
+            // dv is the Jacobian entry.
+            // TODO: need to get the corresponding Equation from the strong connection library
+
+            // Store
+            for(int k=0; k<v_ref.size(); k++){
+                v_ref.push_back(forceRefs[k]);
+                z_ref.push_back(veloRefs[k]);
+                dv.push_back(0); // for now
+            }
+        }
+
+        m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting directional derivatives from slave %d...\n", i);
+        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_DIRECTIONALDERIVATIVES;
+        // TODO fill these with seeds
         m_slaves[i]->fmi2_import_get_directional_derivative(0, 0, v_ref, z_ref, dv);
     }
 }

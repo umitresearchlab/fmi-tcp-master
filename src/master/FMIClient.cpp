@@ -145,3 +145,11 @@ StrongConnector * FMIClient::createConnector(){
     m_strongConnectors.push_back(conn);
     return conn;
 };
+
+int FMIClient::getNumConnectors(){
+    return m_strongConnectors.size();
+}
+
+StrongConnector* FMIClient::getConnector(int i){
+    return m_strongConnectors[i];
+};

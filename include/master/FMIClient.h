@@ -59,6 +59,8 @@ namespace fmitcp_master {
         bool isInitialized();
 
         StrongConnector* createConnector();
+        int getNumConnectors();
+        StrongConnector* getConnector(int i);
 
         void onConnect();
         void onDisconnect();

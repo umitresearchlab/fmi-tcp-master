@@ -1,6 +1,8 @@
 #ifndef MASTER_STRONGCONNECTOR_H_
 #define MASTER_STRONGCONNECTOR_H_
 
+#include <sc/Connector.h>
+
 namespace fmitcp_master {
 
     class FMIClient;
@@ -11,23 +13,24 @@ namespace fmitcp_master {
     protected:
 
         FMIClient* m_client;
+        sc::Connector m_conn;
 
-        bool m_usePosition;
+        bool m_hasPosition;
         int  m_vref_position[3];
 
-        bool m_useQuaternion;
+        bool m_hasQuaternion;
         int  m_vref_quaternion[4];
 
-        bool m_useVelocity;
+        bool m_hasVelocity;
         int  m_vref_velocity[3];
 
-        bool m_useAngularVelocity;
+        bool m_hasAngularVelocity;
         int  m_vref_angularVelocity[3];
 
-        bool m_useForce;
+        bool m_hasForce;
         int  m_vref_force[3];
 
-        bool m_useTorque;
+        bool m_hasTorque;
         int  m_vref_torque[3];
 
     public:
@@ -41,6 +44,16 @@ namespace fmitcp_master {
         void setAngularVelocityValueRefs(int,int,int);
         void setForceValueRefs(int,int,int);
         void setTorqueValueRefs(int,int,int);
+
+        bool hasPosition();
+        bool hasQuaternion();
+        bool hasVelocity();
+        bool hasAngularVelocity();
+        bool hasForce();
+        bool hasTorque();
+
+        std::vector<int> getForceValueRefs() const;
+        std::vector<int> getVelocityValueRefs() const;
     };
 };
 

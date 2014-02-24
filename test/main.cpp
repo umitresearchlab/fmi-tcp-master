@@ -153,6 +153,7 @@ int main(int argc, char *argv[] ) {
     // Test weak connection
     master.createWeakConnection(slaveA, slaveB, 0, 0);
 
+    // Needed to fix lacewing bug on unix. Try commenting/uncommenting if communication get stuck.
     fflush(NULL); fflush(NULL);
 
     // Start simulation

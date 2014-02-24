@@ -151,14 +151,8 @@ namespace fmitcp_master {
         /// Set method for weak coupling
         void setWeakMethod(WeakCouplingAlgorithm algorithm);
 
-        /**
-         * @brief Create strong connection between connector A and B.
-         * To create a strong connection, information about position, velocity and force is required by the solver.
-         */
+        /// Create strong connection
         void addStrongConnection(StrongConnection* conn);
-
-        // For future. This would assume that the modelDescription XML has information about connectors. But we can't assume that for now.
-        //void createLockJoint(FMIClient* slaveA, FMIClient* slaveB, int connectorA, int connectorB);
 
         /// Create weak connection between the slaves
         void createWeakConnection(FMIClient* slaveA, FMIClient* slaveB, int valueReferenceA, int valueReferenceB);
