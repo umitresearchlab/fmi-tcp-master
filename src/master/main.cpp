@@ -139,8 +139,8 @@ int main(int argc, char *argv[] ) {
     }
 
     // Set connections
-    for(i=0; i<strong_slaveA.size(); i++)
-        master.createStrongConnection(slaves[strong_slaveA[i]], slaves[strong_slaveB[i]], strong_connA[i], strong_connB[i]);
+    //for(i=0; i<strong_slaveA.size(); i++)
+    //    master.createStrongConnection(slaves[strong_slaveA[i]], slaves[strong_slaveB[i]], strong_connA[i], strong_connB[i]);
 
     master.simulate();
 

@@ -36,6 +36,7 @@ int main(int argc, char *argv[] ) {
     Master master(logger,&pump);
     master.setTimeStep(0.1);
     master.setEnableEndTime(true);
+    master.setEndTime(0.1);
     master.setWeakMethod(PARALLEL);
 
     for (j = 1; j < argc; j++) {
@@ -129,9 +130,28 @@ int main(int argc, char *argv[] ) {
     slaveB->getLogger()->setPrefix("Master "+int_to_string(slaveB->getId())+": ");
 
     // Test strong connections
-    master.createStrongConnection(slaveA, slaveB, 0, 0);
+    master.createLockJoint( slaveA,
+                            0,1,2,      // Position
+                            3,4,5,6,    // Quaternion
+                            7,8,9,      // Velocity
+                            10,11,12,   // Angular velocity
+                            13,14,15,   // Force
+                            16,17,18,   // Torque
+                            slaveB,
+                            0,1,2,      // Position
+                            3,4,5,6,    // Quaternion
+                            7,8,9,      // Velocity
+                            10,11,12,   // Angular velocity
+                            13,14,15,   // Force
+                            16,17,18    // Torque
+                            );
+
+    // Test weak connection
     master.createWeakConnection(slaveA, slaveB, 0, 0);
 
+    fflush(NULL);// fflush(NULL);
+
+    // Start simulation
     master.simulate();
 
     return 0;
