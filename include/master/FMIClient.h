@@ -73,7 +73,8 @@ namespace fmitcp_master {
         /// Get "result" value references, this is velocities
         std::vector<int> getStrongSeedOutputValueReferences();
 
-        void setConnectorValues(std::vector<int> valueRefs, std::vector<double> values);
+        void setConnectorValues          (std::vector<int> valueRefs, std::vector<double> values);
+        void setConnectorFutureVelocities(std::vector<int> valueRefs, std::vector<double> values);
 
         void onConnect();
         void onDisconnect();

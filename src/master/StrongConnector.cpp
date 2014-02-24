@@ -128,3 +128,16 @@ void StrongConnector::setValues(std::vector<int> valueReferences, std::vector<do
         }
     }
 };
+
+void StrongConnector::setFutureValues(std::vector<int> valueReferences, std::vector<double> values){
+    assert(valueReferences.size() == values.size());
+
+    for(int i=0; i<valueReferences.size(); i++){
+        int vr = valueReferences[i];
+        double val = values[i];
+        for(int j=0; j<3; j++){
+            if(vr == m_vref_velocity[i])        m_conn.m_futureVelocity[j] =          val;
+            if(vr == m_vref_angularVelocity[i]) m_conn.m_futureAngularVelocity[j] =   val;
+        }
+    }
+};

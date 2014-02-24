@@ -162,7 +162,7 @@ void Master::initializeSlaves() {
 }
 
 void Master::getStrongCouplingReals(){
-    setState(MASTER_STATE_GET_STRONG_REALS);
+    setState(MASTER_STATE_GET_STRONG_CONNECTOR_STATES);
 
     for(int i=0; i<m_slaves.size(); i++){
         FMIClient * s = m_slaves[i];
@@ -250,14 +250,10 @@ void Master::stepSlaves(bool forFutureVelocities){
 void Master::getFutureVelocities(){
     setState(MASTER_STATE_GETTING_FUTURE_VELO);
     for(int i=0; i<m_slaves.size(); i++){
+        FMIClient* s = m_slaves[i];
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting future velocity from slave %d...\n", i);
-        m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_GET_REAL;
-        std::vector<int> valueRefs;
-
-        // Get all connector velocity references
-        // TODO
-
-        m_slaves[i]->fmi2_import_get_real(0,0,valueRefs);
+        s->m_state = FMICLIENT_STATE_WAITING_GET_REAL;
+        s->fmi2_import_get_real(0,0,s->getStrongSeedOutputValueReferences());
     }
 }
 
@@ -300,24 +296,24 @@ void Master::setState(MasterState state){
     m_state = state;
 
     switch(m_state){
-    case MASTER_STATE_START:                            m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_START\n");                             break;
-    case MASTER_STATE_CONNECTING_SLAVES:                m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_CONNECTING_SLAVES\n");                 break;
-    case MASTER_STATE_START_SIMLOOP:                    m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_START_SIMLOOP\n");                     break;
-    case MASTER_STATE_GETTING_VERSION:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_VERSION\n");                   break;
-    case MASTER_STATE_GETTING_XML:                      m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_XML\n");                       break;
-    case MASTER_STATE_INSTANTIATING_SLAVES:             m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_INSTANTIATING_SLAVES\n");              break;
-    case MASTER_STATE_INITIALIZING_SLAVES:              m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_INITIALIZING_SLAVES\n");               break;
-    case MASTER_STATE_TRANSFERRING_WEAK:                m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_TRANSFERRING_WEAK\n");                 break;
-    case MASTER_STATE_GETTING_STATES:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_STATES\n");                    break;
-    case MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO:  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO\n");   break;
-    case MASTER_STATE_SETTING_STATES:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_SETTING_STATES\n");                    break;
-    case MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES:  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES\n");   break;
-    case MASTER_STATE_SETTING_STRONG_COUPLING_FORCES:   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_SETTING_STRONG_COUPLING_FORCES\n");    break;
-    case MASTER_STATE_STEPPING_SLAVES:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_STEPPING_SLAVES\n");                   break;
-    case MASTER_STATE_GET_WEAK_REALS:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GET_WEAK_REALS\n");                    break;
-    case MASTER_STATE_SET_WEAK_REALS:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_SET_WEAK_REALS\n");                    break;
-    case MASTER_STATE_GET_STRONG_REALS:                 m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GET_STRONG_REALS\n");                  break;
-    case MASTER_STATE_DONE:                             m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_DONE\n");                              break;
+    case MASTER_STATE_START:                            m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_START ===\n");                             break;
+    case MASTER_STATE_CONNECTING_SLAVES:                m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_CONNECTING_SLAVES ===\n");                 break;
+    case MASTER_STATE_START_SIMLOOP:                    m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_START_SIMLOOP ===\n");                     break;
+    case MASTER_STATE_GETTING_VERSION:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_GETTING_VERSION ===\n");                   break;
+    case MASTER_STATE_GETTING_XML:                      m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_GETTING_XML ===\n");                       break;
+    case MASTER_STATE_INSTANTIATING_SLAVES:             m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_INSTANTIATING_SLAVES ===\n");              break;
+    case MASTER_STATE_INITIALIZING_SLAVES:              m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_INITIALIZING_SLAVES ===\n");               break;
+    case MASTER_STATE_TRANSFERRING_WEAK:                m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_TRANSFERRING_WEAK ===\n");                 break;
+    case MASTER_STATE_GETTING_STATES:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_GETTING_STATES ===\n");                    break;
+    case MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO:  m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO ===\n");   break;
+    case MASTER_STATE_SETTING_STATES:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_SETTING_STATES ===\n");                    break;
+    case MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES:  m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES ===\n");   break;
+    case MASTER_STATE_SETTING_STRONG_COUPLING_FORCES:   m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_SETTING_STRONG_COUPLING_FORCES ===\n");    break;
+    case MASTER_STATE_STEPPING_SLAVES:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_STEPPING_SLAVES ===\n");                   break;
+    case MASTER_STATE_GET_WEAK_REALS:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_GET_WEAK_REALS ===\n");                    break;
+    case MASTER_STATE_SET_WEAK_REALS:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_SET_WEAK_REALS ===\n");                    break;
+    case MASTER_STATE_GET_STRONG_CONNECTOR_STATES:      m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_GET_STRONG_CONNECTOR_STATES ===\n");       break;
+    case MASTER_STATE_DONE:                             m_logger.log(fmitcp::Logger::LOG_DEBUG,"=== MASTER_STATE_DONE ===\n");                              break;
 
     default:
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"State not recognized: %d\n",m_state);
@@ -423,12 +419,12 @@ void Master::tick(){
 
     case MASTER_STATE_SETTING_STATES:
         if(allClientsHaveState(FMICLIENT_STATE_DONE_SET_STATE)){
-            // Done rewinding. Now get directional derivatives.
+            // Done rewinding.
             getStrongCouplingReals();
         }
         break;
 
-    case MASTER_STATE_GET_STRONG_REALS:
+    case MASTER_STATE_GET_STRONG_CONNECTOR_STATES:
 
         // All ready?
         if(!allClientsHaveState(FMICLIENT_STATE_DONE_GET_REAL))
@@ -570,9 +566,16 @@ void Master::onSlaveSetReal(FMIClient* slave){
 void Master::onSlaveGotReal(FMIClient* slave){
     slave->m_state = FMICLIENT_STATE_DONE_GET_REAL;
 
-    if(m_state == MASTER_STATE_GET_STRONG_REALS){
-        std::vector<int> refs = slave->getStrongConnectorValueReferences(); // References
-        slave->setConnectorValues(refs,slave->m_getRealValues);
+    if(m_state == MASTER_STATE_GET_STRONG_CONNECTOR_STATES){
+
+        // Got real values for connectors. Set em.
+        slave->setConnectorValues(slave->getStrongConnectorValueReferences(), slave->m_getRealValues);
+
+    } else if(m_state == MASTER_STATE_GETTING_FUTURE_VELO){
+
+        // Got future velocities. Set them in the connector
+        slave->setConnectorFutureVelocities(slave->getStrongSeedOutputValueReferences(), slave->m_getRealValues);
+
     }
 
     tick();

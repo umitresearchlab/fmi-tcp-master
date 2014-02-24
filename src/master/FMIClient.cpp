@@ -156,9 +156,13 @@ StrongConnector* FMIClient::getConnector(int i){
 
 
 void FMIClient::setConnectorValues(std::vector<int> valueRefs, std::vector<double> values){
-    for(int i=0; i<getNumConnectors(); i++){
+    for(int i=0; i<getNumConnectors(); i++)
         getConnector(i)->setValues(valueRefs,values);
-    }
+};
+
+void FMIClient::setConnectorFutureVelocities(std::vector<int> valueRefs, std::vector<double> values){
+    for(int i=0; i<getNumConnectors(); i++)
+        getConnector(i)->setFutureValues(valueRefs,values);
 };
 
 std::vector<int> FMIClient::getStrongConnectorValueReferences(){

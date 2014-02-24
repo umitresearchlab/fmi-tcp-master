@@ -63,6 +63,9 @@ namespace fmitcp_master {
 
         /// Set all connector values, given value references and values
         void setValues(std::vector<int> valueReferences, std::vector<double> values);
+
+        // Set future velocities
+        void setFutureValues(std::vector<int> valueReferences, std::vector<double> values);
     };
 };
 

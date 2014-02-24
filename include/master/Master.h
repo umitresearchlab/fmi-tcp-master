@@ -42,7 +42,7 @@ namespace fmitcp_master {
             3.1.4 setState      (rewind)
 
             And also directional derivatives:
-            3.1.5 getStrongCouplingReals
+            3.1.5 getStrongCouplingConnectorStates
             3.1.6 getDirecionalDerivatives
 
             The resulting strong coupling constraint forces are applied:
@@ -74,7 +74,7 @@ namespace fmitcp_master {
         MASTER_STATE_STEPPING_SLAVES,
         MASTER_STATE_GET_WEAK_REALS,
         MASTER_STATE_SET_WEAK_REALS,
-        MASTER_STATE_GET_STRONG_REALS,
+        MASTER_STATE_GET_STRONG_CONNECTOR_STATES,
         MASTER_STATE_DONE
     };
 
