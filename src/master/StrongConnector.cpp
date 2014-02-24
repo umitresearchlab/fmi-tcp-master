@@ -79,3 +79,7 @@ std::vector<int> StrongConnector::getVelocityValueRefs() const {
     return result;
 };
 
+
+sc::Connector * StrongConnector::getConnector(){
+    return &m_conn;
+}

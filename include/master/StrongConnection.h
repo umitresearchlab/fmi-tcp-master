@@ -12,6 +12,7 @@ namespace fmitcp_master {
     private:
         StrongConnector* m_connA;
         StrongConnector* m_connB;
+        sc::Constraint * m_constraint;
 
     public:
 
@@ -21,6 +22,7 @@ namespace fmitcp_master {
 
         StrongConnection( StrongConnector* connA , StrongConnector* connB, StrongConnectionType type );
         virtual ~StrongConnection();
+        sc::Constraint * getConstraint();
     };
 };
 

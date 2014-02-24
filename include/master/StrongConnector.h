@@ -36,7 +36,9 @@ namespace fmitcp_master {
     public:
         StrongConnector(FMIClient* slave);
         virtual ~StrongConnector();
+
         FMIClient * getSlave();
+        sc::Connector * getConnector();
 
         void setPositionValueRefs(int,int,int);
         void setQuaternionValueRefs(int,int,int,int);

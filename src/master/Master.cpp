@@ -20,7 +20,6 @@ Master::Master(const fmitcp::Logger& logger, fmitcp::EventPump* pump){
 
 void Master::init(){
 
-
     // Set state
     setState(MASTER_STATE_CONNECTING_SLAVES);
     m_slaveIdCounter = 0;
@@ -35,9 +34,6 @@ void Master::init(){
 Master::~Master(){
 
     // Delete all connections
-    /*for (int i = 0; i < m_strongConnections.size(); ++i){
-        delete m_strongConnections[i];
-    }*/
     for (int i = 0; i < m_weakConnections.size(); ++i){
         delete m_weakConnections[i];
     }
@@ -45,14 +41,6 @@ Master::~Master(){
     // Delete all remaining slaves
     for (int i = 0; i < m_slaves.size(); ++i){
         delete m_slaves[i];
-    }
-
-    // Delete all strong coupling data
-    for(int i=0; i<m_strongCouplingSlaves.size(); i++){
-        delete m_strongCouplingSlaves[i];
-    }
-    for(int i=0; i<m_strongCouplingConnectors.size(); i++){
-        delete m_strongCouplingConnectors[i];
     }
 }
 
@@ -85,6 +73,7 @@ FMIClient* Master::connectSlave(std::string uri){
 
 void Master::simulate(){
 
+    /*
     // If strong coupling was added, we need to set up the system for that
     if(m_strongConnections.size() > 0){
 
@@ -111,6 +100,7 @@ void Master::simulate(){
             m_strongCouplingSolver.addSlave(slave);
         }
     }
+    */
 
     m_pump->startEventLoop();
     tick();
@@ -460,6 +450,7 @@ void Master::tick(){
 }
 
 void Master::addStrongConnection(StrongConnection* conn){
+    m_strongCouplingSolver.addConstraint(conn->getConstraint());
     m_strongConnections.push_back(conn);
 };
 

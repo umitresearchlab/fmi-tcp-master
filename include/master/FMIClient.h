@@ -2,6 +2,7 @@
 #define MASTER_FMICLIENT_H_
 
 #include <fmitcp/Client.h>
+#include <sc/Slave.h>
 #include <string>
 #include "master/StrongConnector.h"
 
@@ -41,6 +42,7 @@ namespace fmitcp_master {
         string m_xml;
         bool m_initialized;
         std::vector<StrongConnector*> m_strongConnectors;
+        sc::Slave m_strongCouplingSlave;
 
     public:
 

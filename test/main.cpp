@@ -129,9 +129,11 @@ int main(int argc, char *argv[] ) {
     slaveA->getLogger()->setPrefix("Master "+int_to_string(slaveA->getId())+": ");
     slaveB->getLogger()->setPrefix("Master "+int_to_string(slaveB->getId())+": ");
 
+    // Create connectors
     StrongConnector* connA = slaveA->createConnector();
     StrongConnector* connB = slaveA->createConnector();
 
+    // We must specify what value refs that correspond to each connector
     connA->setPositionValueRefs(0,1,2);
     connA->setQuaternionValueRefs(3,4,5,6);
     connA->setVelocityValueRefs(7,8,9);
