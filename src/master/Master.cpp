@@ -256,17 +256,23 @@ void Master::setState(MasterState state){
     m_state = state;
 
     switch(m_state){
+    case MASTER_STATE_START:                            m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_START\n");                             break;
     case MASTER_STATE_CONNECTING_SLAVES:                m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_CONNECTING_SLAVES\n");                 break;
+    case MASTER_STATE_START_SIMLOOP:                    m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_START_SIMLOOP\n");                     break;
     case MASTER_STATE_GETTING_VERSION:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_VERSION\n");                   break;
     case MASTER_STATE_GETTING_XML:                      m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_XML\n");                       break;
     case MASTER_STATE_INSTANTIATING_SLAVES:             m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_INSTANTIATING_SLAVES\n");              break;
     case MASTER_STATE_INITIALIZING_SLAVES:              m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_INITIALIZING_SLAVES\n");               break;
     case MASTER_STATE_TRANSFERRING_WEAK:                m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_TRANSFERRING_WEAK\n");                 break;
+    case MASTER_STATE_GETTING_STATES:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_STATES\n");                    break;
+    case MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO:  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_STEPPING_SLAVES_FOR_FUTURE_VELO\n");   break;
+    case MASTER_STATE_SETTING_STATES:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_SETTING_STATES\n");                    break;
     case MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES:  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GETTING_DIRECTIONAL_DERIVATIVES\n");   break;
     case MASTER_STATE_SETTING_STRONG_COUPLING_FORCES:   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_SETTING_STRONG_COUPLING_FORCES\n");    break;
     case MASTER_STATE_STEPPING_SLAVES:                  m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_STEPPING_SLAVES\n");                   break;
-    case MASTER_STATE_DONE:                             m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_DONE\n");                              break;
     case MASTER_STATE_GET_WEAK_REALS:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_GET_WEAK_REALS\n");                    break;
+    case MASTER_STATE_SET_WEAK_REALS:                   m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_SET_WEAK_REALS\n");                    break;
+    case MASTER_STATE_DONE:                             m_logger.log(fmitcp::Logger::LOG_DEBUG,"MASTER_STATE_DONE\n");                              break;
 
     default:
         m_logger.log(fmitcp::Logger::LOG_DEBUG,"State not recognized: %d\n",m_state);
