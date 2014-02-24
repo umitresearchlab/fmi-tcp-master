@@ -10,6 +10,7 @@ LINK_DIRECTORIES   (${FMIL_LIBS_DIR}    ${STRONG_COUPLING_LIBS_DIR}    ${FMITCP_
 
 SET(MASTER_SRCS
     src/master/Connection.cpp
+    src/master/StrongConnector.cpp
     src/master/main.cpp
     src/master/Master.cpp
     src/master/FMIClient.cpp
@@ -23,6 +24,7 @@ SET(MASTER_HEADERS
     include/master/Master.h
     include/master/FMIClient.h
     include/master/StrongConnection.h
+    include/master/StrongConnector.h
     include/master/WeakConnection.h
     include/common/common.h
     include/common/url_parser.h
@@ -34,6 +36,7 @@ SET(TEST_SRCS
     src/master/Master.cpp
     src/master/FMIClient.cpp
     src/master/StrongConnection.cpp
+    src/master/StrongConnector.cpp
     src/master/WeakConnection.cpp
     src/common/url_parser.c
     src/common/common.cpp
@@ -43,6 +46,7 @@ SET(TEST_HEADERS
     include/master/Master.h
     include/master/FMIClient.h
     include/master/StrongConnection.h
+    include/master/StrongConnector.h
     include/master/WeakConnection.h
     include/common/common.h
     include/common/url_parser.h

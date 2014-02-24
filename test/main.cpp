@@ -129,27 +129,31 @@ int main(int argc, char *argv[] ) {
     slaveA->getLogger()->setPrefix("Master "+int_to_string(slaveA->getId())+": ");
     slaveB->getLogger()->setPrefix("Master "+int_to_string(slaveB->getId())+": ");
 
-    // Test strong connections
-    master.createLockJoint( slaveA,
-                            0,1,2,      // Position
-                            3,4,5,6,    // Quaternion
-                            7,8,9,      // Velocity
-                            10,11,12,   // Angular velocity
-                            13,14,15,   // Force
-                            16,17,18,   // Torque
-                            slaveB,
-                            0,1,2,      // Position
-                            3,4,5,6,    // Quaternion
-                            7,8,9,      // Velocity
-                            10,11,12,   // Angular velocity
-                            13,14,15,   // Force
-                            16,17,18    // Torque
-                            );
+    StrongConnector* connA = slaveA->createConnector();
+    StrongConnector* connB = slaveA->createConnector();
+
+    connA->setPositionValueRefs(0,1,2);
+    connA->setQuaternionValueRefs(3,4,5,6);
+    connA->setVelocityValueRefs(7,8,9);
+    connA->setAngularVelocityValueRefs(10,11,12);
+    connA->setForceValueRefs(13,14,15);
+    connA->setTorqueValueRefs(16,17,18);
+
+    connB->setPositionValueRefs(0,1,2);
+    connB->setQuaternionValueRefs(3,4,5,6);
+    connB->setVelocityValueRefs(7,8,9);
+    connB->setAngularVelocityValueRefs(10,11,12);
+    connB->setForceValueRefs(13,14,15);
+    connB->setTorqueValueRefs(16,17,18);
+
+    // Create strong connections
+    StrongConnection sconn(connA,connB,StrongConnection::CONNECTION_LOCK);
+    master.addStrongConnection(&sconn);
 
     // Test weak connection
     master.createWeakConnection(slaveA, slaveB, 0, 0);
 
-    fflush(NULL);// fflush(NULL);
+    fflush(NULL); fflush(NULL);
 
     // Start simulation
     master.simulate();

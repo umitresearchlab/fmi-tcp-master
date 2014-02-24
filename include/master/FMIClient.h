@@ -3,6 +3,7 @@
 
 #include <fmitcp/Client.h>
 #include <string>
+#include "master/StrongConnector.h"
 
 namespace fmitcp_master {
 
@@ -39,6 +40,7 @@ namespace fmitcp_master {
         Master * m_master;
         string m_xml;
         bool m_initialized;
+        std::vector<StrongConnector*> m_strongConnectors;
 
     public:
 
@@ -55,6 +57,8 @@ namespace fmitcp_master {
         void setId(int id);
         FMIClientState getState();
         bool isInitialized();
+
+        StrongConnector* createConnector();
 
         void onConnect();
         void onDisconnect();

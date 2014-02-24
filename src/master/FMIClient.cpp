@@ -139,3 +139,9 @@ void FMIClient::on_fmi2_import_get_directional_derivative_res(int mid, const vec
 //void on_fmi2_import_get_boolean_res                     (int mid, const vector<bool>& values, fmitcp_proto::fmi2_status_t status);
 //void on_fmi2_import_get_string_res                      (int mid, const vector<string>& values, fmitcp_proto::fmi2_status_t status);
 */
+
+StrongConnector * FMIClient::createConnector(){
+    StrongConnector * conn = new StrongConnector(this);
+    m_strongConnectors.push_back(conn);
+    return conn;
+};

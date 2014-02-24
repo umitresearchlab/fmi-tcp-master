@@ -22,8 +22,6 @@ namespace fmitcp_master {
         PARALLEL
     };
 
-
-
     /*
 
     === The simulation loop ===
@@ -154,24 +152,10 @@ namespace fmitcp_master {
         void setWeakMethod(WeakCouplingAlgorithm algorithm);
 
         /**
-         * @brief Create strong connection between slaves A and B.
+         * @brief Create strong connection between connector A and B.
          * To create a strong connection, information about position, velocity and force is required by the solver.
          */
-        void createLockJoint(   FMIClient* slaveA,
-                                int vref_positionA_x,           int vref_positionA_y,           int vref_positionA_z,
-                                int vref_quaternionA_x,         int vref_quaternionA_y,         int vref_quaternionA_z,         int vref_quaternionA_w,
-                                int vref_velocityA_x,           int vref_velocityA_y,           int vref_velocityA_z,
-                                int vref_angularVelocityA_x,    int vref_angularVelocityA_y,    int vref_angularVelocityA_z,
-                                int vref_forceA_x,              int vref_forceA_y,              int vref_forceA_z,
-                                int vref_torqueA_x,             int vref_torqueA_y,             int vref_torqueA_z,
-
-                                FMIClient* slaveB,
-                                int vref_positionB_x,           int vref_positionB_y,           int vref_positionB_z,
-                                int vref_quaternionB_x,         int vref_quaternionB_y,         int vref_quaternionB_z,         int vref_quaternionB_w,
-                                int vref_velocityB_x,           int vref_velocityB_y,           int vref_velocityB_z,
-                                int vref_angularVelocityB_x,    int vref_angularVelocityB_y,    int vref_angularVelocityB_z,
-                                int vref_forceB_x,              int vref_forceB_y,              int vref_forceB_z,
-                                int vref_torqueB_x,             int vref_torqueB_y,             int vref_torqueB_z);
+        void addStrongConnection(StrongConnection* conn);
 
         // For future. This would assume that the modelDescription XML has information about connectors. But we can't assume that for now.
         //void createLockJoint(FMIClient* slaveA, FMIClient* slaveB, int connectorA, int connectorB);
