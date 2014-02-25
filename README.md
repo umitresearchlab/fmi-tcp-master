@@ -1,9 +1,21 @@
 fmi-tcp-master
 ==============
-Connects simulation slaves (FMUs) over TCP. Has built in support for weak and strong coupling.
+Co-simulates slaves (FMUs) over TCP. Has built in support for weak and strong coupling.
+
+# Typical usage
+
+1. The FMI host starts the slave ```server```.
+2. A user that wants to simulate starts the ```master``` application, which connects to one or more slaves.
+3. Simulation is run and results are stored on disk.
 
 # Install instructions
-Prerequisities are [Lacewing](http://lacewing-project.org/), [Protobuf](https://developers.google.com/protocol-buffers), [FMITCP](https://github.com/umitresearchlab/fmi-co-simulation), and [Strong Coupling Core](https://github.com/umitresearchlab/strong-coupling-core).
+Prerequisities are
+* [Lacewing](http://lacewing-project.org/) version 0.5.4
+* [Protobuf](https://developers.google.com/protocol-buffers)
+* [FMITCP](https://github.com/umitresearchlab/fmi-co-simulation)
+* [Strong Coupling Core](https://github.com/umitresearchlab/strong-coupling-core)
+
+To build, run:
 
     cd fmi-tcp-master/;
     mkdir build && cd build;
