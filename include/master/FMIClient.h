@@ -1,6 +1,8 @@
 #ifndef MASTER_FMICLIENT_H_
 #define MASTER_FMICLIENT_H_
 
+#define FMILIB_BUILDING_LIBRARY
+#include <fmilib.h>
 #include <fmitcp/Client.h>
 #include <sc/Slave.h>
 #include <string>
@@ -46,6 +48,14 @@ namespace fmitcp_master {
         std::vector<StrongConnector*> m_strongConnectors;
         sc::Slave m_strongCouplingSlave;
 
+        // variables for modelDescription.xml
+        jm_callbacks m_jmCallbacks;
+        string m_workingDir;
+        fmi_import_context_t* m_context;
+        // FMI 2.0
+        fmi2_import_t* m_fmi2Instance;
+        fmi2_import_variable_list_t* m_fmi2Variables;
+
     public:
 
         FMIClientState m_state;
@@ -85,7 +95,7 @@ namespace fmitcp_master {
         void onDisconnect();
         void onError(string err);
 
-        void onGetXmlRes(int mid, string xml);
+        void onGetXmlRes(int mid, fmitcp_proto::jm_log_level_enu_t logLevel, string xml);
         void on_fmi2_import_instantiate_res                     (int mid, fmitcp_proto::jm_status_enu_t status);
         void on_fmi2_import_initialize_slave_res                (int mid, fmitcp_proto::fmi2_status_t status);
         void on_fmi2_import_terminate_slave_res                 (int mid, fmitcp_proto::fmi2_status_t status);

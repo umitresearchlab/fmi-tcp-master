@@ -1,10 +1,19 @@
+#include <fstream>
 #include <fmitcp/Client.h>
 #include <fmitcp/Logger.h>
 
 #include "master/Master.h"
+#include "common/common.h"
 #include "master/FMIClient.h"
 
 using namespace fmitcp_master;
+
+/*!
+ * Callback function for FMILibrary. Logs the FMILibrary operations.
+ */
+void jmCallbacksLoggerClient(jm_callbacks* c, jm_string module, jm_log_level_enu_t log_level, jm_string message) {
+  printf("[module = %s][log level = %s] %s\n", module, jm_log_level_to_string(log_level), message);fflush(NULL);
+}
 
 FMIClient::FMIClient(Master* master, fmitcp::EventPump* pump) : fmitcp::Client(pump) {
     m_master = master;
@@ -14,8 +23,12 @@ FMIClient::FMIClient(Master* master, fmitcp::EventPump* pump) : fmitcp::Client(p
     m_numDirectionalDerivativesLeft = 0;
 };
 
-FMIClient::~FMIClient(){
-
+FMIClient::~FMIClient() {
+  // free the FMIL instances used for parsing the xml file.
+  fmi2_import_free(m_fmi2Instance);
+  fmi_import_free_context(m_context);
+  fmi_import_rmdir(&m_jmCallbacks, m_workingDir.c_str());
+  free(m_fmi2Variables);
 };
 
 void FMIClient::onConnect(){
@@ -48,9 +61,40 @@ bool FMIClient::isInitialized(){
     return m_initialized;
 };
 
-void FMIClient::onGetXmlRes(int mid, string xml){
+void FMIClient::onGetXmlRes(int mid, fmitcp_proto::jm_log_level_enu_t logLevel, string xml) {
   m_xml = xml;
-  // TODO parse the xml.
+  // parse the xml.
+  // JM callbacks
+  m_jmCallbacks.malloc = malloc;
+  m_jmCallbacks.calloc = calloc;
+  m_jmCallbacks.realloc = realloc;
+  m_jmCallbacks.free = free;
+  m_jmCallbacks.logger = jmCallbacksLoggerClient;
+  m_jmCallbacks.log_level = protoJMLogLevelToFmiJMLogLevel(logLevel);
+  m_jmCallbacks.context = 0;
+  // working directory
+  char* dir = fmi_import_mk_temp_dir(&m_jmCallbacks, NULL, "fmitcp_master_");
+  m_workingDir = dir; // convert to std::string
+  free(dir);
+  // save the xml as a file i.e modelDescription.xml
+  ofstream xmlFile (m_workingDir.append("/modelDescription.xml").c_str());
+  xmlFile << m_xml;
+  xmlFile.close();
+  // import allocate context
+  m_context = fmi_import_allocate_context(&m_jmCallbacks);
+  // parse the xml file
+  m_fmi2Instance = fmi2_import_parse_xml(m_context, m_workingDir.c_str(), 0);
+  if (m_fmi2Instance) {
+    /* 0 - original order as found in the XML file;
+     * 1 - sorted alphabetically by variable name;
+     * 2 sorted by types/value references.
+     */
+    int sortOrder = 0;
+    m_fmi2Variables = fmi2_import_get_variable_list(m_fmi2Instance, sortOrder);
+  } else {
+    m_logger.log(fmitcp::Logger::LOG_ERROR, "Error parsing the modelDescription.xml file contained in %s\n", m_workingDir.c_str());
+  }
+  // Inform the master now.
   m_master->onSlaveGetXML(this);
 };
 
