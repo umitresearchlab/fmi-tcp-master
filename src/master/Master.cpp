@@ -188,6 +188,9 @@ void Master::fetchDirectionalDerivatives() {
     std::vector<int> z_ref;
     std::vector<double> dv;
 
+    for(int i=0; i<m_slaves.size(); i++)
+        m_slaves[i]->m_numDirectionalDerivativesLeft = 0;
+
     // Get jacobian information
     for (int j = 0; j < eqs.size(); ++j){
         sc::Equation * eq = eqs[j];
@@ -207,6 +210,7 @@ void Master::fetchDirectionalDerivatives() {
         eq->getRotationalJacobianSeedA(rotSeed);
         slaveA->fmi2_import_get_directional_derivative(0, 0, v_ref, z_ref, dv);
         slaveA->m_numDirectionalDerivativesLeft++;
+        m_pump->tick();
         //slaveA->getDirectionalDerivative(ddSpatial,ddRotational,slaveA->m_position,spatSeed,rotSeed, dt);
         //printf("Eq %d:\n", j);
         //printf("A = (%f %f %f)\n", ddSpatial[0], ddSpatial[1], ddSpatial[2]);
@@ -219,6 +223,7 @@ void Master::fetchDirectionalDerivatives() {
         eq->getRotationalJacobianSeedB(rotSeed);
         slaveB->fmi2_import_get_directional_derivative(0, 0, v_ref, z_ref, dv);
         slaveB->m_numDirectionalDerivativesLeft++;
+        m_pump->tick();
         //slaveB->getDirectionalDerivative(ddSpatial,ddRotational,slaveB->m_position,spatSeed,rotSeed, dt);
         //printf("B: dd=(%f %f %f), seed=(%f %f %f)\n", ddSpatial[0], ddSpatial[1], ddSpatial[2], spatSeed[0], spatSeed[1], spatSeed[2]);
         //eq->setSpatialJacobianB(ddSpatial);
@@ -650,8 +655,11 @@ void Master::onSlaveDirectionalDerivative(FMIClient* slave){
 
     m_logger.log(fmitcp::Logger::LOG_DEBUG,"Got directional derivative data from slave %d. Still %d to go...\n",slave->getId(),slave->m_numDirectionalDerivativesLeft);
 
-    if(slave->m_numDirectionalDerivativesLeft == 0)
+    if(slave->m_numDirectionalDerivativesLeft == 0){
         slave->m_state = FMICLIENT_STATE_DONE_DIRECTIONALDERIVATIVES;
+    }
+
+    m_pump->tick();
 
     tick();
 };

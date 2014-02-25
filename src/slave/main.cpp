@@ -15,13 +15,13 @@ public:
    : Server(fmuPath, debugLogging, logLevel, pump) {}
   ~FMIServer() {};
   void onClientConnect() {
-    //printf("MyFMIServer::onConnect\n");
+    printf("MyFMIServer::onConnect\n");
     //m_pump->exitEventLoop();
   };
 
   void onClientDisconnect() {
-    //printf("MyFMIServer::onDisconnect\n");
-    //m_pump->exitEventLoop();
+    printf("MyFMIServer::onDisconnect\n");
+    m_pump->exitEventLoop();
   };
 
   void onError(string message) {
@@ -125,8 +125,14 @@ int main(int argc, char *argv[]) {
   FMIServer server(fmuPath, debugLogging, log_level, &pump);
   if (!server.isFmuParsed())
     return EXIT_FAILURE;
+
+  server.getLogger()->setPrefix("Server: ");
   server.host(hostName, port);
-  server.getLogger()->setFilter(Logger::LOG_NETWORK | Logger::LOG_DEBUG | Logger::LOG_ERROR);
+
+  // If communication stops without reason, try removing one or both of these. This is due to a bug in the lacewing library?
+  fflush(NULL); fflush(NULL);
+
+  //server.getLogger()->setFilter(Logger::LOG_NETWORK | Logger::LOG_DEBUG | Logger::LOG_ERROR);
   pump.startEventLoop();
 
   return EXIT_SUCCESS;
