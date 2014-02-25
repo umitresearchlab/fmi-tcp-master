@@ -143,6 +143,15 @@ void Master::slaveDisconnected(FMIClient* client){
         m_pump->exitEventLoop();
 }
 
+void Master::getXmlForSlaves() {
+  setState(MASTER_STATE_GETTING_XML);
+  for(int i=0; i<m_slaves.size(); i++) {
+    m_logger.log(fmitcp::Logger::LOG_DEBUG,"Getting XML slave %d...\n", i);
+    m_slaves[i]->m_state = FMICLIENT_STATE_WAITING_GET_XML;
+    m_slaves[i]->getXml(0, 0);
+  }
+}
+
 void Master::instantiateSlaves() {
   setState(MASTER_STATE_INSTANTIATING_SLAVES);
   for(int i=0; i<m_slaves.size(); i++){
@@ -404,15 +413,21 @@ void Master::tick(){
         if(!allConnected)
             break;
 
-        // Enough slaves connected. Start initializing!
-        instantiateSlaves();
+        // Enough slaves connected. Start getting XML!
+        getXmlForSlaves();
         break;
 
     case MASTER_STATE_GETTING_VERSION:
         break;
 
     case MASTER_STATE_GETTING_XML:
+      // Check if all are ready
+      if(!allClientsHaveState(FMICLIENT_STATE_DONE_GET_XML))
         break;
+
+      // All slaves have got the xml. Start instantiating!
+      instantiateSlaves();
+      break;
 
     case MASTER_STATE_INSTANTIATING_SLAVES:
       // Check if all are ready
@@ -579,8 +594,9 @@ void Master::setWeakMethod(WeakCouplingAlgorithm algorithm){
     m_method = algorithm;
 }
 
-void Master::onSlaveGetXML(FMIClient * slave){
-    tick();
+void Master::onSlaveGetXML(FMIClient * slave) {
+  slave->m_state = FMICLIENT_STATE_DONE_GET_XML;
+  tick();
 };
 
 void Master::onSlaveInstantiated(FMIClient* slave){

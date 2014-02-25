@@ -162,6 +162,7 @@ namespace fmitcp_master {
         /// Start simulation
         void simulate();
 
+        void getXmlForSlaves();
         /// Request all slaves to instantiate
         void instantiateSlaves();
         void initializeSlaves();
