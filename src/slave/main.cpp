@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
   server.host(hostName, port);
 
   // If communication stops without reason, try removing one or both of these. This is due to a bug in the lacewing library?
-  fflush(NULL); fflush(NULL);
+  //fflush(NULL); fflush(NULL);
 
   //server.getLogger()->setFilter(Logger::LOG_NETWORK | Logger::LOG_DEBUG | Logger::LOG_ERROR);
   pump.startEventLoop();
