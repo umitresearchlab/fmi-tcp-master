@@ -49,8 +49,9 @@ bool FMIClient::isInitialized(){
 };
 
 void FMIClient::onGetXmlRes(int mid, string xml){
-    m_xml = xml;
-    m_master->onSlaveGetXML(this);
+  m_xml = xml;
+  // TODO parse the xml.
+  m_master->onSlaveGetXML(this);
 };
 
 void FMIClient::on_fmi2_import_instantiate_res(int mid, fmitcp_proto::jm_status_enu_t status){
