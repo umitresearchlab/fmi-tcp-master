@@ -219,7 +219,7 @@ void Master::fetchDirectionalDerivatives() {
         eq->getRotationalJacobianSeedA(rotSeed);
         slaveA->fmi2_import_get_directional_derivative(0, 0, v_ref, z_ref, dv);
         slaveA->m_numDirectionalDerivativesLeft++;
-        m_pump->tick();
+        //m_pump->tick();
         //slaveA->getDirectionalDerivative(ddSpatial,ddRotational,slaveA->m_position,spatSeed,rotSeed, dt);
         //printf("Eq %d:\n", j);
         //printf("A = (%f %f %f)\n", ddSpatial[0], ddSpatial[1], ddSpatial[2]);
@@ -232,7 +232,7 @@ void Master::fetchDirectionalDerivatives() {
         eq->getRotationalJacobianSeedB(rotSeed);
         slaveB->fmi2_import_get_directional_derivative(0, 0, v_ref, z_ref, dv);
         slaveB->m_numDirectionalDerivativesLeft++;
-        m_pump->tick();
+        //m_pump->tick();
         //slaveB->getDirectionalDerivative(ddSpatial,ddRotational,slaveB->m_position,spatSeed,rotSeed, dt);
         //printf("B: dd=(%f %f %f), seed=(%f %f %f)\n", ddSpatial[0], ddSpatial[1], ddSpatial[2], spatSeed[0], spatSeed[1], spatSeed[2]);
         //eq->setSpatialJacobianB(ddSpatial);
