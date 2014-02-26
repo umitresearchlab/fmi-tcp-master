@@ -31,7 +31,28 @@ public:
 };
 
 void printHelp() {
-  printf("HELP PAGE: TODO\n");fflush(NULL);
+  printf("Usage\n\
+\n\
+slave [OPTIONS] FMUPATH\n\
+\n\
+OPTIONS\n\
+\n\
+    --port [INTEGER]\n\
+        The port to run the server on.\n\
+\n\
+    --host [STRING]\n\
+        The host name to run the server on.\n\
+\n\
+    --help\n\
+        You're looking at it.\n\
+\n\
+FMUPATH\n\
+\n\
+    The path to the FMU to serve.\n\
+\n\
+EXAMPLES\n\
+\n\
+    slave --host localhost --port 3000 mySim.fmu\n\n");fflush(NULL);
 }
 
 int main(int argc, char *argv[]) {

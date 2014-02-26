@@ -19,12 +19,6 @@ master [OPTIONS] [FMU_URLS...]\n\
 \n\
 OPTIONS\n\
 \n\
-    --port [INTEGER]\n\
-        The port to run the server on.\n\
-\n\
-    --host [STRING]\n\
-        The host name to run the server on.\n\
-\n\
     --timeStep [NUMBER]\n\
             Timestep size. Default is 0.1.\n\
 \n\
@@ -61,7 +55,7 @@ FMU_URLS\n\
 \n\
 EXAMPLES\n\
 \n\
-    (TODO)\n\n");fflush(NULL);
+    master --weakConnections 0,0,0,0:0,0,0,0 tcp://localhost:3000\n\n");fflush(NULL);
 }
 
 int main(int argc, char *argv[] ) {
@@ -77,8 +71,6 @@ int main(int argc, char *argv[] ) {
 
     const char* connectionsArg;
     int i, j;
-    string hostName = "localhost";
-    long port = 3000;
 
     // Connections
     vector<int> strong_slaveA;
@@ -100,21 +92,6 @@ int main(int argc, char *argv[] ) {
         if (arg == "-h" || arg == "--help") {
             printHelp();
             return EXIT_SUCCESS;
-
-        } else if((arg == "--port" || arg == "-p") && !last) {
-            std::string nextArg = argv[j+1];
-
-            std::istringstream ss(nextArg);
-            ss >> port;
-            j++;
-
-            if (port <= 0) {
-                printf("Invalid port.\n");
-                return EXIT_FAILURE;
-            }
-
-        } else if (arg == "--host" && !last) {
-            hostName = argv[j+1];
 
         } else if (arg == "--timeStep" && !last) {
             std::string nextArg = argv[j+1];
