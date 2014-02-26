@@ -148,16 +148,14 @@ int main(int argc, char *argv[] ) {
     connB->setTorqueValueRefs(16,17,18);
 
     // Create strong connections
-    /*
     StrongConnection sconn(connA,connB,StrongConnection::CONNECTION_LOCK);
     master.addStrongConnection(&sconn);
-    */
 
     // Test weak connection
     master.createWeakConnection(slaveA, slaveB, 0, 0);
 
     // Needed to fix lacewing bug on unix. Try commenting/uncommenting if communication get stuck.
-    //fflush(NULL); //fflush(NULL);
+    fflush(NULL); fflush(NULL);
 
     // Start simulation
     master.simulate();

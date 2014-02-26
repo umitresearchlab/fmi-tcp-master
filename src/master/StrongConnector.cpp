@@ -117,14 +117,14 @@ void StrongConnector::setValues(std::vector<int> valueReferences, std::vector<do
         int vr = valueReferences[i];
         double val = values[i];
         for(int j=0; j<3; j++){
-            if(vr == m_vref_position[i])        m_conn.m_position[j] =          val;
-            if(vr == m_vref_velocity[i])        m_conn.m_velocity[j] =          val;
-            if(vr == m_vref_angularVelocity[i]) m_conn.m_angularVelocity[j] =   val;
-            if(vr == m_vref_force[i])           m_conn.m_force[j] =             val;
-            if(vr == m_vref_torque[i])          m_conn.m_torque[j] =            val;
+            if(vr == m_vref_position[j])        m_conn.m_position[j] =          val;
+            if(vr == m_vref_velocity[j])        m_conn.m_velocity[j] =          val;
+            if(vr == m_vref_angularVelocity[j]) m_conn.m_angularVelocity[j] =   val;
+            if(vr == m_vref_force[j])           m_conn.m_force[j] =             val;
+            if(vr == m_vref_torque[j])          m_conn.m_torque[j] =            val;
         }
         for(int j=0; j<4; j++){
-            if(vr == m_vref_quaternion[i])      m_conn.m_quaternion[j] =        val;
+            if(vr == m_vref_quaternion[j])      m_conn.m_quaternion[j] =        val;
         }
     }
 };
@@ -136,8 +136,8 @@ void StrongConnector::setFutureValues(std::vector<int> valueReferences, std::vec
         int vr = valueReferences[i];
         double val = values[i];
         for(int j=0; j<3; j++){
-            if(vr == m_vref_velocity[i])        m_conn.m_futureVelocity[j] =          val;
-            if(vr == m_vref_angularVelocity[i]) m_conn.m_futureAngularVelocity[j] =   val;
+            if(vr == m_vref_velocity[j])        m_conn.m_futureVelocity[j] =          val;
+            if(vr == m_vref_angularVelocity[j]) m_conn.m_futureAngularVelocity[j] =   val;
         }
     }
 };

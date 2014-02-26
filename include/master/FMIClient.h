@@ -56,6 +56,11 @@ namespace fmitcp_master {
         fmi2_import_t* m_fmi2Instance;
         fmi2_import_variable_list_t* m_fmi2Variables;
 
+        // For accumulating getDirectionalDerivative requests
+        std::vector< std::vector<int> > m_dd_v_refs;
+        std::vector< std::vector<int> > m_dd_z_refs;
+        std::vector< std::vector<double> > m_dd_dvs;
+
     public:
 
         FMIClientState m_state;
@@ -72,12 +77,22 @@ namespace fmitcp_master {
 
         int getId();
         void setId(int id);
+
         FMIClientState getState();
         bool isInitialized();
 
         StrongConnector* createConnector();
         int getNumConnectors();
         StrongConnector* getConnector(int i);
+
+        /// Accumulate a get_directional_derivative request
+        void pushDirectionalDerivativeRequest(int fmiId, std::vector<int> v_ref, std::vector<int> z_ref, std::vector<double> dv);
+
+        /// Execute the next directional derivative request in the queue
+        void shiftExecuteDirectionalDerivativeRequest();
+
+        /// Get the total number of directional derivative requests queued
+        int numDirectionalDerivativeRequests();
 
         /// Returns value references of positions and velocities of all connectors
         std::vector<int> getStrongConnectorValueReferences();

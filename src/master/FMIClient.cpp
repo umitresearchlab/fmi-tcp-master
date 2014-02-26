@@ -34,6 +34,30 @@ FMIClient::~FMIClient() {
   if(m_fmi2Variables!=NULL) free(m_fmi2Variables);
 };
 
+/// Accumulate a get_directional_derivative request
+void FMIClient::pushDirectionalDerivativeRequest(int fmiId, std::vector<int> v_ref, std::vector<int> z_ref, std::vector<double> dv){
+    m_dd_v_refs.push_back(v_ref);
+    m_dd_z_refs.push_back(z_ref);
+    m_dd_dvs.push_back(dv);
+};
+
+/// Execute the next directional derivative request in the queue
+void FMIClient::shiftExecuteDirectionalDerivativeRequest(){
+    std::vector<int> v_ref = m_dd_v_refs.back();
+    std::vector<int> z_ref = m_dd_z_refs.back();
+    std::vector<double> dv = m_dd_dvs.back();
+
+    m_dd_v_refs.pop_back();
+    m_dd_z_refs.pop_back();
+    m_dd_dvs.pop_back();
+    fmi2_import_get_directional_derivative(0, 0, v_ref, z_ref, dv);
+};
+
+/// Get the total number of directional derivative requests queued
+int FMIClient::numDirectionalDerivativeRequests(){
+    return m_dd_v_refs.size();
+};
+
 void FMIClient::onConnect(){
     m_master->slaveConnected(this);
 };
@@ -202,7 +226,6 @@ int FMIClient::getNumConnectors(){
 StrongConnector* FMIClient::getConnector(int i){
     return m_strongConnectors[i];
 };
-
 
 void FMIClient::setConnectorValues(std::vector<int> valueRefs, std::vector<double> values){
     for(int i=0; i<getNumConnectors(); i++)
