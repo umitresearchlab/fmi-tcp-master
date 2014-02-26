@@ -107,7 +107,6 @@ int main(int argc, char *argv[] ) {
     }
 
     // Create a slave
-    /*
     fmitcp::Server serverA(fmuPath, debugLogging, log_level, master.getEventPump());
     fmitcp::Server serverB(fmuPath, debugLogging, log_level, master.getEventPump());
     if (!serverA.isFmuParsed() || !serverB.isFmuParsed())
@@ -116,7 +115,6 @@ int main(int argc, char *argv[] ) {
     serverB.getLogger()->setPrefix("SlaveB: ");
     serverA.host(hostName,port);
     serverB.host(hostName,port+1);
-    */
     master.getLogger()->setPrefix("Master:   ");
 
     // Create ports
@@ -125,14 +123,14 @@ int main(int argc, char *argv[] ) {
 
     // Connect
     FMIClient* slaveA = master.connectSlave("tcp://"+hostName+":"+portStringStream1.str());
-    //FMIClient* slaveB = master.connectSlave("tcp://"+hostName+":"+portStringStream2.str());
+    FMIClient* slaveB = master.connectSlave("tcp://"+hostName+":"+portStringStream2.str());
 
     slaveA->getLogger()->setPrefix("Master "+int_to_string(slaveA->getId())+": ");
-    //slaveB->getLogger()->setPrefix("Master "+int_to_string(slaveB->getId())+": ");
+    slaveB->getLogger()->setPrefix("Master "+int_to_string(slaveB->getId())+": ");
 
     // Create connectors
     StrongConnector* connA = slaveA->createConnector();
-    //StrongConnector* connB = slaveB->createConnector();
+    StrongConnector* connB = slaveB->createConnector();
 
     // We must specify what value refs that correspond to each connector
     connA->setPositionValueRefs(0,1,2);
@@ -142,7 +140,6 @@ int main(int argc, char *argv[] ) {
     connA->setForceValueRefs(13,14,15);
     connA->setTorqueValueRefs(16,17,18);
 
-    /*
     connB->setPositionValueRefs(0,1,2);
     connB->setQuaternionValueRefs(3,4,5,6);
     connB->setVelocityValueRefs(7,8,9);
@@ -150,6 +147,7 @@ int main(int argc, char *argv[] ) {
     connB->setForceValueRefs(13,14,15);
     connB->setTorqueValueRefs(16,17,18);
 
+    /*
     // Create strong connections
     StrongConnection sconn(connA,connB,StrongConnection::CONNECTION_LOCK);
     master.addStrongConnection(&sconn);
