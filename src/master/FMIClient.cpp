@@ -21,14 +21,17 @@ FMIClient::FMIClient(Master* master, fmitcp::EventPump* pump) : fmitcp::Client(p
     m_state = FMICLIENT_STATE_START;
     m_isInstantiated = false;
     m_numDirectionalDerivativesLeft = 0;
+    m_fmi2Instance = NULL;
+    m_context = NULL;
+    m_fmi2Variables = NULL;
 };
 
 FMIClient::~FMIClient() {
   // free the FMIL instances used for parsing the xml file.
-  fmi2_import_free(m_fmi2Instance);
-  fmi_import_free_context(m_context);
+  if(m_fmi2Instance!=NULL)  fmi2_import_free(m_fmi2Instance);
+  if(m_context!=NULL)       fmi_import_free_context(m_context);
   fmi_import_rmdir(&m_jmCallbacks, m_workingDir.c_str());
-  free(m_fmi2Variables);
+  if(m_fmi2Variables!=NULL) free(m_fmi2Variables);
 };
 
 void FMIClient::onConnect(){
