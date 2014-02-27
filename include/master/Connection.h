@@ -11,6 +11,7 @@ namespace fmitcp_master {
       CONNECTION_COMPLETE
     };
 
+    /// Base class for connections
     class Connection {
 
     protected:

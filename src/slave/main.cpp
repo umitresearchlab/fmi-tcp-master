@@ -38,17 +38,17 @@ slave [OPTIONS] FMUPATH\n\
 OPTIONS\n\
 \n\
     --port [INTEGER]\n\
-        The port to run the server on.\n\
+        The port to run the server on. Default is 3000.\n\
 \n\
     --host [STRING]\n\
-        The host name to run the server on.\n\
+        The host name to run the server on. Default is 'localhost'.\n\
 \n\
     --help\n\
         You're looking at it.\n\
 \n\
 FMUPATH\n\
 \n\
-    The path to the FMU to serve.\n\
+    The path to the FMU to serve. If FMUPATH is \"dummy\", then the server will always respond with dummy responses, which is nice for debugging.\n\
 \n\
 EXAMPLES\n\
 \n\

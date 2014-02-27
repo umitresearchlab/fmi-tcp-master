@@ -9,14 +9,16 @@
 using namespace fmitcp_master;
 
 void printHelp(){
-    printf("Usage: ./test [OPTIONS] FMUPATH\n\
+    printf("Test app. Will start a master and a number of slaves and try doing all kinds of coupling in between them.\n\
+\n\
+Usage: ./test [OPTIONS] [FMUPATH]\n\
 \n\
 [OPTIONS]\n\
     --host [HOST]   The host. Defaults to 'localhost'.\n\
-    --port [PORT]   A free port to use.\n\
+    --port [PORT]   A free port to use. Default is 3000.\n\
 \n\
 FMUPATH\n\
-    Path to an FMU to run.\n\n");
+    Path to an FMU to run. If \"dummy\" is given, the servers will always respond with dummy data and won't load any FMU.\n\n");
 }
 
 int main(int argc, char *argv[] ) {
@@ -102,8 +104,8 @@ int main(int argc, char *argv[] ) {
     }
 
     if(fmuPath == "") {
-      printHelp();
-      return EXIT_FAILURE;
+        // Use dummy
+        fmuPath = "dummy";
     }
 
     // Create a slave

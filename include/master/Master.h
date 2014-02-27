@@ -22,40 +22,37 @@ namespace fmitcp_master {
         PARALLEL
     };
 
-    /*
-
-    === The simulation loop ===
-
-    Start everything up:
-    1. instantiate
-    2. initialize
-
-    Simulation loop runs until we reach end time:
-    3. simulation loop
-
-        3.1 If there are strong coupling connections:
-
-            We need velocities one step ahead for the strong coupling:
-            3.1.1 getState
-            3.1.2 doStep
-            3.1.3 getReal       (get only velocities)
-            3.1.4 setState      (rewind)
-
-            And also directional derivatives:
-            3.1.5 getStrongCouplingConnectorStates
-            3.1.6 getDirecionalDerivatives
-
-            The resulting strong coupling constraint forces are applied:
-            3.1.7 setReal       (strong coupling forces)
-
-        We transfer values from weak coupling:
-        3.2 setReal
-
-        Final step.
-        3.3 doStep
-
+    /**
+     * The master state. Basically, the simulation loop looks like this:
+     *
+     * Start everything up:
+     * 1. instantiate
+     * 2. initialize
+     *
+     * Simulation loop runs until we reach end time:
+     * 3. simulation loop
+     *
+     *     3.1 If there are strong coupling connections:
+     *
+     *         We need velocities one step ahead for the strong coupling:
+     *         3.1.1 getState
+     *         3.1.2 doStep
+     *         3.1.3 getReal       (get only velocities)
+     *         3.1.4 setState      (rewind)
+     *
+     *         And also directional derivatives:
+     *         3.1.5 getStrongCouplingConnectorStates
+     *         3.1.6 getDirecionalDerivatives
+     *
+     *         The resulting strong coupling constraint forces are applied:
+     *         3.1.7 setReal       (strong coupling forces)
+     *
+     *     We transfer values from weak coupling:
+     *     3.2 setReal
+     *
+     *     Final step.
+     *     3.3 doStep
      */
-
     enum MasterState {
         MASTER_STATE_START,
         MASTER_STATE_CONNECTING_SLAVES,
@@ -79,33 +76,53 @@ namespace fmitcp_master {
     };
 
     /**
-     * @brief Handles all connections to slaves connected via TCP and requests them to step.
+     * @brief Handles all connections to slaves connected via TCP and requests them to, for example, step.
+     * The master provides several stepping algorithms and methods for changing settings regarding these.
      */
     class Master {
 
     private:
+
+        /// All weak connections defined
         std::vector<WeakConnection*> m_weakConnections;
+
+        /// All strong connections
         std::vector<StrongConnection*> m_strongConnections;
+
+        /// All connected slaves
         std::vector<FMIClient*> m_slaves;
+
+        /// Is this used ?
         std::vector<int> m_slave_ids;
+
         fmitcp::EventPump * m_pump;
         int m_slaveIdCounter;
         fmitcp::Logger m_logger;
         WeakCouplingAlgorithm m_method;
+
+        /// Current master state
         MasterState m_state;
         double m_relativeTolerance;
         double m_timeStep;
         double m_startTime;
         double m_endTime;
         bool m_endTimeDefined;
+
         /// Current time
         double m_time;
+
+        /// Solver that solves strong connections
         sc::Solver m_strongCouplingSolver;
+
+        /// Strong coupling slaves for the sc library.
         std::vector<sc::Slave*> m_strongCouplingSlaves;
+
+        /// sc lib connectors
         std::vector<sc::Connector*> m_strongCouplingConnectors;
 
     public:
 
+        // Create a master instance with the given logger and event pump
         Master(const fmitcp::Logger& logger, fmitcp::EventPump* pump);
         virtual ~Master();
 

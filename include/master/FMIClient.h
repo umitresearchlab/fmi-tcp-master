@@ -12,6 +12,7 @@ namespace fmitcp_master {
 
     class Master;
 
+    /// Current state of the FMI Client
     enum FMIClientState {
         FMICLIENT_STATE_START,
         FMICLIENT_STATE_WAITING_GET_XML,
@@ -38,6 +39,7 @@ namespace fmitcp_master {
         FMICLIENT_STATE_DONE_TERMINATE_SLAVE,
     };
 
+    /// Adds high-level FMI methods to the Client, similar to FMILibrary functions.
     class FMIClient : public fmitcp::Client {
 
     private:
@@ -63,7 +65,9 @@ namespace fmitcp_master {
 
     public:
 
+        /// Current state of the client
         FMIClientState m_state;
+
         bool m_isInstantiated;
 
         /// How many more directional derivatives to wait for
@@ -72,6 +76,7 @@ namespace fmitcp_master {
         /// Last fetched result from getReal
         std::vector<double> m_getRealValues;
 
+        /// Create a new client for the Master, driven by the given eventpump.
         FMIClient(Master* master, fmitcp::EventPump* pump);
         virtual ~FMIClient();
 
@@ -81,8 +86,11 @@ namespace fmitcp_master {
         FMIClientState getState();
         bool isInitialized();
 
+        /// Create a strong coupling connector for this client
         StrongConnector* createConnector();
         int getNumConnectors();
+
+        /// Get a connector. See getNumConnectors().
         StrongConnector* getConnector(int i);
 
         /// Accumulate a get_directional_derivative request
@@ -106,9 +114,17 @@ namespace fmitcp_master {
         void setConnectorValues          (std::vector<int> valueRefs, std::vector<double> values);
         void setConnectorFutureVelocities(std::vector<int> valueRefs, std::vector<double> values);
 
+        /// Called when the client connects.
         void onConnect();
+
+        /// Called when the client disconnects.
         void onDisconnect();
+
+        /// Called if an error occurred.
         void onError(string err);
+
+
+        // --- These methods overrides Client methods. Most of them just passes the result to the Master ---
 
         void onGetXmlRes(int mid, fmitcp_proto::jm_log_level_enu_t logLevel, string xml);
         void on_fmi2_import_instantiate_res                     (int mid, fmitcp_proto::jm_status_enu_t status);
