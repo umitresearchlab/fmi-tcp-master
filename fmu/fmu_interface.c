@@ -128,3 +128,55 @@ fmiStatus fmiGetDirectionalDerivative(fmiComponent c, const fmiValueReference vU
   // TODO Write code here
   return fmiOK;
 }
+
+/***************************************************
+Functions for FMI for Model Exchange
+****************************************************/
+
+/***************************************************
+Functions for FMI for Co-Simulation
+****************************************************/
+fmiStatus fmiSetRealInputDerivatives(fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], const fmiReal value[]) {
+  // TODO Write code here
+  return fmiOK;
+}
+
+fmiStatus fmiGetRealOutputDerivatives (fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger order[], fmiReal value[]) {
+  // TODO Write code here
+  return fmiOK;
+}
+
+fmiStatus fmiDoStep(fmiComponent c, fmiReal currentCommunicationPoint, fmiReal communicationStepSize, fmiBoolean noSetFMUStatePriorToCurrentPoint) {
+  // TODO Write code here
+  return fmiOK;
+}
+
+fmiStatus fmiCancelStep(fmiComponent c) {
+  // TODO Write code here
+  return fmiOK;
+}
+
+fmiStatus fmiGetStatus(fmiComponent c, const fmiStatusKind s, fmiStatus* value) {
+  // TODO Write code here
+  return fmiOK;
+}
+
+fmiStatus fmiGetRealStatus(fmiComponent c, const fmiStatusKind s, fmiReal* value) {
+  // TODO Write code here
+  return fmiOK;
+}
+
+fmiStatus fmiGetIntegerStatus(fmiComponent c, const fmiStatusKind s, fmiInteger* value) {
+  // TODO Write code here
+  return fmiOK;
+}
+
+fmiStatus fmiGetBooleanStatus(fmiComponent c, const fmiStatusKind s, fmiBoolean* value) {
+  // TODO Write code here
+  return fmiOK;
+}
+
+fmiStatus fmiGetStringStatus(fmiComponent c, const fmiStatusKind s, fmiString* value) {
+  // TODO Write code here
+  return fmiOK;
+}

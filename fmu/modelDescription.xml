@@ -22,4 +22,6 @@
     tolerance="0.0001"/>
   <ModelVariables>
   </ModelVariables>
+  <ModelStructure>
+  </ModelStructure>
 </fmiModelDescription>
