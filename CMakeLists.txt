@@ -118,3 +118,18 @@ SET_TARGET_PROPERTIES(fmu
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bin"
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bin"
 )
+
+# remove the exisitng fmu and directories
+EXECUTE_PROCESS(COMMAND rm -r -f "${CMAKE_CURRENT_LIST_DIR}/bin/binaries")
+EXECUTE_PROCESS(COMMAND rm -f "${CMAKE_CURRENT_LIST_DIR}/bin/vanilla.fmu")
+
+# create the needed directories
+EXECUTE_PROCESS(COMMAND mkdir -p "${CMAKE_CURRENT_LIST_DIR}/bin/binaries/win32")
+
+# copy the fmu.dll to binaries & modelDescription.xml to bin
+EXECUTE_PROCESS(COMMAND cp "${CMAKE_CURRENT_LIST_DIR}/bin/libfmu.dll" "${CMAKE_CURRENT_LIST_DIR}/bin/binaries/win32")
+EXECUTE_PROCESS(COMMAND cp "${CMAKE_CURRENT_LIST_DIR}/fmu/modelDescription.xml" "${CMAKE_CURRENT_LIST_DIR}/bin")
+
+# make a zip file
+EXECUTE_PROCESS(COMMAND zip -r "vanilla.fmu" "binaries" "modelDescription.xml"
+                WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/bin)
