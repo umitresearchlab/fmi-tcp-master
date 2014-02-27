@@ -1,4 +1,4 @@
-fmi-tcp-master
+fmi-tcp-master   {#mainpage}
 ==============
 Co-simulates slaves (FMUs) over TCP. Has built in support for weak and strong coupling.
 

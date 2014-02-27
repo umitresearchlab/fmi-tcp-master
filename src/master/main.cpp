@@ -177,6 +177,7 @@ int main(int argc, char *argv[] ) {
     }
 
     // Set connections
+    // TODO : How should these connections be specified via command line???
     //for(i=0; i<strong_slaveA.size(); i++)
     //    master.createStrongConnection(slaves[strong_slaveA[i]], slaves[strong_slaveB[i]], strong_connA[i], strong_connB[i]);
 
