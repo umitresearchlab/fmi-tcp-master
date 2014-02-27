@@ -25,50 +25,16 @@ To build, run:
              -DLACEWING_LIBS_DIR=<Lacewing libraries location> \
              -DSTRONG_COUPLING_INCLUDE_DIR=<Strong coupling core include files location> \
              -DSTRONG_COUPLING_LIBS_DIR=<Strong coupling core libraries location>
+             -DFMIL_INCLUDE_DIR=<FMILibrary include files location> \
+             -DFMIL_LIBS_DIR=<FMILibrary libraries location>
 
 # Usage
+Typically, you start the server and listen to a port. You you provide the path to an FMU or just "dummy" to serve a dummy FMU.
 
-    fmi-tcp-master [OPTIONS] [FMU_URLS...]
+    ./bin/slave --host localhost --port 3000 dummy
 
-    OPTIONS
+Start client and connect to server. This code below will connect and simulate until time=10:
 
-        --port [INTEGER]
-            The port to run the server on.
+    ./bin/master --stopAfter 10 tcp://localhost:3000
 
-        --host [STRING]
-            The host name to run the server on.
-
-        --timeStep [NUMBER]
-                Timestep size. Default is 0.1.
-
-        --stopAfter [NUMBER]
-            End simulation time in seconds. Default is 1.0.
-
-        --weakMethod [STRING]
-            Stepping  method for weak coupling connections. Must be "parallel" or "serial". Default is "parallel".
-
-        --weakConnections [STRING]
-            Connection  specification. No connections by default. Quadruples of
-            positive integers, representing which FMU and value reference to connect
-            from and what to connect to. Syntax is
-
-                CONN1:CONN2:CONN3...
-
-            where CONNX is four comma-separated integers FMUFROM,VRFROM,FMUTO,VRTO.
-            An example connection string is
-
-                0,0,1,0:0,1,1,1
-
-            which means: connect FMU0 (value reference 0) to FMU1 (vr 0) and FMU0
-            (vr 1) to FMU1 (vr 1).  Default is no  connections.
-
-        --strongConnections
-
-    FMU_URLS
-
-        Urls to FMU servers, separated by spaces. For example "tcp://fmiserver.com:1234".
-
-    EXAMPLES
-
-        (TODO)
-```
+Run any of the commands with the --help flag to see the help pages.
