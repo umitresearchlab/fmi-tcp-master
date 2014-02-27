@@ -98,3 +98,23 @@ ELSE(WIN32)
     TARGET_LINK_LIBRARIES(slave  ${LINUXLIBS})
     TARGET_LINK_LIBRARIES(test   ${LINUXLIBS})
 ENDIF(WIN32)
+
+SET(FMU_SRCS
+  fmu/fmu_interface.c
+)
+SET(FMU_HEADERS
+  fmu/include/fmiFunctions.h
+  fmu/include/fmiFunctionTypes.h
+  fmu/include/fmiTypesPlatform.h
+  fmu/include/fmu_interface.h
+)
+
+# create the fmu.dll
+ADD_LIBRARY(fmu SHARED ${FMU_HEADERS} ${FMU_SRCS})
+
+SET_TARGET_PROPERTIES(fmu
+    PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bin"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bin"
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/bin"
+)
