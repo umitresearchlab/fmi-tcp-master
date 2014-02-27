@@ -13,6 +13,8 @@ namespace fmitcp_master {
         int m_valueRefB;
 
     public:
+
+        /// Crate a causal connection from a value reference in slaveA to a value reference in slaveB.
         WeakConnection( FMIClient* slaveA,
                         FMIClient* slaveB,
                         int valueRefA,
